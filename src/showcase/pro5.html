@@ -3,29 +3,112 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>pro5 · skia-macos 图文渲染 · 王腾飞</title>
+    <meta
+      name="description"
+      content="skia-macos：模板化批量出图，适用商品静态图、海报、落地页与投放配图等凡需栅格图片交付的场景。"
+    />
+    <title>pro5 · 智能海报生成 · 王腾飞</title>
     <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
     <article class="article-page">
       <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
       <header>
-        <p class="meta">pro5 · macOS · Skia 图文渲染</p>
-        <h1>skia-macos 图文渲染系统</h1>
-        <p class="meta">Skia 图形栈在 macOS 上做模板渲染与高清导出。</p>
+        <p class="meta">pro5 · 营销物料 · 批量出图</p>
+        <h1>智能海报生成</h1>
+        <p class="meta">
+          面向<strong>商品静态图、营销海报、落地页与专题配图、社媒与信息流素材</strong>等凡以栅格图片为交付物的场景：内容随活动与
+          SKU 变化时，用数据换文案与图片，一键批量出图。
+        </p>
       </header>
+
       <div class="prose">
-        <h2>项目介绍</h2>
+        <h2>一、产品</h2>
         <p>
-          基于 Skia 在 macOS 上搭建的图文渲染能力，用于模板化制图、批量出图与与设计规范一致的平面物料生产；可与业务系统对接，由结构化数据驱动版式与导出。
+          本项目解决的是日常运营里「同一套视觉模板，要反复换内容」的麻烦：交付物可能是<strong>商品主图、活动海报、落地页切片、门店物料或广告位配图</strong>等，形式不一，但共性是版式大体不变，只变标题、卖点、价格带、商品静态图与装饰元素。大促、上新、门店拉新、季节与垂直品类活动皆如此。手工在工具里一张张改，既慢又容易和规范跑偏；交给设计排期，又很难跟上运营节奏。
         </p>
         <p>
-          相关素材与说明可置于 <code style="font-family: var(--mono)">resource/pro5/</code>。
+          产品侧把这类工作抽象成<strong>可复用的版式模板 + 数据驱动出图</strong>：运营或增长同学只要维护结构化信息（文案、图片地址、活动参数等），就能在统一视觉规范下批量得到可直接投放或再微调的成品图，减少重复劳动，也让「品牌安全区、字体层级、主色」等要求有稳定落点。
         </p>
-        <h2>技术介绍</h2>
+        <p><strong>典型需求场景包括：</strong></p>
+        <ul>
+          <li>电商与本地生活：<strong>商品静态图、主图、活动 KV、落地页配图、店铺氛围图</strong>，上新频繁、SKU 多、需要同一视觉多变量。</li>
+          <li>营销节点：<strong>节日、大促、联名</strong>等短期活动，时间紧、物料数量大。</li>
+          <li>内容团队：<strong>社媒配图、渠道投放素材</strong>，在统一模板下快速试稿与迭代。</li>
+          <li>与设计协作：设计定版式与规则，业务侧自助换内容，降低来回改稿成本。</li>
+        </ul>
+      </div>
+
+      <div class="prose stack">
+        <h2>二、Demo</h2>
         <p>
-          渲染侧以 Skia 为核心做矢量与位图合成，字体子集化、图片解码与色彩空间在导出前一次性烘焙；宿主侧常用 Swift/Objective-C++ 桥接，版式数据可由 JSON 或业务中台下发。
+          以下为<strong>营销海报</strong>示例的导出效果；工程内对应目录与 skia-macos 仓库中的
+          <code style="font-family: var(--mono)">projects/*</code> 一致。本站静态资源位于
+          <code style="font-family: var(--mono)">resource/pro6/</code> 下（与仓库目录同名对齐），便于与现有素材库一并托管。
         </p>
+      </div>
+
+      <div class="stack">
+      <div class="poster-showcase">
+        <figure>
+          <img src="../resource/pro6/trip/output/trip_rendered.png" alt="青海湖旅游攻略海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>青海湖旅游攻略 · <code style="font-family: var(--mono)">projects/trip/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/sunscreen/output/sunscreen_poster.png" alt="防晒海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>防晒海报 · <code style="font-family: var(--mono)">projects/sunscreen/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/food/output/food_poster.png" alt="美食海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>美食海报 · <code style="font-family: var(--mono)">projects/food/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/spring/output/spring_poster.png" alt="春天海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>春天海报 · <code style="font-family: var(--mono)">projects/spring/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/dessert/output/dessert_poster.png" alt="甜品海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>甜品海报 · <code style="font-family: var(--mono)">projects/dessert/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/cup/output/cup_poster.png" alt="杯子海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>杯子海报 · <code style="font-family: var(--mono)">projects/cup/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/horizontal/output/horizontal_poster.png" alt="冬至海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>冬至海报 · <code style="font-family: var(--mono)">projects/horizontal/</code></figcaption>
+        </figure>
+        <figure>
+          <img src="../resource/pro6/clothes/output/clothes_poster.png" alt="服装海报" width="800" height="1200" loading="lazy" decoding="async" />
+          <figcaption>服装海报 · <code style="font-family: var(--mono)">projects/clothes/</code></figcaption>
+        </figure>
+      </div>
+      </div>
+
+      <div class="prose stack">
+        <h2>三、技术方案</h2>
+        <p>实现侧对应开源仓库 <strong>skia-macos</strong>（目标平台 macOS），要点如下。</p>
+        <ul>
+          <li>
+            <strong>图形与协议：</strong>以 <strong>Skia</strong> 为图形栈；用 <strong>JSON 协议</strong>描述画布、素材与文本样式，由引擎解析后导出
+            <strong>PNG / JPEG</strong>。
+          </li>
+          <li>
+            <strong>代码结构：</strong>大致分为渲染编排、各类型 Renderer、文字动画与导出等模块，职责拆分便于扩展新元素与输出路径。
+          </li>
+          <li>
+            <strong>构建：</strong><strong>CMake</strong>、<strong>C++17</strong>；根目录 <code style="font-family: var(--mono)">./build.sh</code> 支持
+            <code style="font-family: var(--mono)">--debug</code> / <code style="font-family: var(--mono)">--release</code>。
+          </li>
+          <li>
+            <strong>文档：</strong>协议、文本布局、动画与测试等见仓库 <code style="font-family: var(--mono)">docs/</code>，例如
+            <code style="font-family: var(--mono)">PROTOCOL.md</code>、<code style="font-family: var(--mono)">TEXT_RENDERING.md</code>、<code style="font-family: var(--mono)">ANIMATION.md</code>、<code style="font-family: var(--mono)">TESTING.md</code>。
+          </li>
+          <li>
+            <strong>示例工程：</strong>位于 <code style="font-family: var(--mono)">projects/</code>，与 Demo 图注中的各
+            <code style="font-family: var(--mono)">projects/*</code> 目录一致。
+          </li>
+        </ul>
         <div class="doc-actions">
           <a
             class="btn btn--primary"

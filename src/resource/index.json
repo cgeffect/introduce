@@ -13,7 +13,8 @@
     {
       "id": "pro3",
       "name": "remotion",
-      "github": "https://github.com/cgeffect/remotion-render"
+      "github": "https://github.com/cgeffect/remotion-render",
+      "video": "pro3/remotion.mp4"
     },
     {
       "id": "pro4",
@@ -22,7 +23,7 @@
     },
     {
       "id": "pro5",
-      "name": "skia-macos 图文渲染系统",
+      "name": "skia-macos 智能海报生成",
       "github": "https://github.com/cgeffect/skia-macos"
     },
     {
@@ -39,7 +40,7 @@
   "industryInsights": [
     {
       "id": "pro8",
-      "name": "营销视频剪辑行业现状分析"
+      "name": "营销视频剪辑与个人对 AI 智能剪辑的行业理解"
     }
   ]
 }

@@ -15,27 +15,40 @@
         <p class="meta">React 组件即时间线，可接入 Node 渲染与批量出片管线。</p>
       </header>
       <div class="prose">
-        <h2>说明</h2>
+        <h2>一、产品</h2>
         <p>
-          当前 <code style="font-family: var(--mono)">resource/pro3/</code> 目录为空，可在其中补充工程截图、导出样片或配置说明。站点根下已有一份本地录屏
-          <code style="font-family: var(--mono)">resource/remotion.mov</code>，用于快速展示 Remotion 相关能力。
+          这是一套基于 <strong>Remotion</strong> 的<strong>可编程成片能力</strong>：把营销片、片头片尾、数据看板视频等，从「每次手工剪辑」收敛成「可复用的模板 + 数据驱动渲染」。同一套描述既能在本地或 CI 里批量出片，也能与现有 Node 渲染服务、任务队列对接，适合模板化强、SKU 或活动参数变化频繁的业务。
         </p>
         <p>
-          Remotion 将 React 组件时间轴化，适合模板化营销视频、数据驱动片头等场景；具体管线与运行方式以仓库 README 为准。
+          与通用剪辑软件相比，优势在于<strong>版本化、可测、可自动化</strong>：时间线以代码与配置表达，变更可 diff、可回滚；与纯 FFmpeg 脚本相比，又保留 React 生态里的组件化与状态管理，降低复杂包装的维护成本。
+        </p>
+      </div>
+
+      <div class="prose stack">
+        <h2>二、Demo</h2>
+        <p>
+          下方为录屏演示（<code style="font-family: var(--mono)">resource/pro3/remotion.mp4</code>），对应仓库内资源索引里 pro3 的
+          <code style="font-family: var(--mono)">video</code> 字段，便于与站点其他项目资源结构对齐。
         </p>
       </div>
       <div class="media-block stack">
-        <div class="media-block__label">resource/remotion.mov</div>
+        <div class="media-block__label">演示视频 · remotion.mp4</div>
         <video controls preload="metadata" playsinline>
-          <source src="../resource/remotion.mov" type="video/quicktime" />
+          <source src="../resource/pro3/remotion.mp4" type="video/mp4" />
           您的浏览器不支持内嵌播放。
         </video>
       </div>
 
       <div class="prose stack">
-        <h2>技术介绍</h2>
+        <h2>三、技术方案</h2>
         <p>
-          Remotion 在 React 中描述帧与合成，由 CLI 或自定义 runner 驱动 FFmpeg 导出；适合把设计稿拆成可参数化组件，再在 CI 或任务队列里按数据批量渲染 MP4。依赖与目录约定以仓库为准。
+          <strong>编排层：</strong>用 Remotion 在 React 中描述帧、序列与合成关系，时间轴与图层以组件树组织，便于拆成可复用片段与主题变量。
+        </p>
+        <p>
+          <strong>渲染与导出：</strong>由 Remotion CLI 或自建 runner 调起浏览器内核完成合成，再经 FFmpeg 输出 MP4 等交付格式；可按并发度部署多 worker，与消息队列或调度系统组合做批量任务。
+        </p>
+        <p>
+          <strong>工程化：</strong>依赖、目录约定、与 CI/CD 的衔接以仓库 README 为准；若需与云剪辑主链路对齐，可将「参数 JSON → Remotion composition」作为统一入口，由上游任务写入数据、下游只负责渲染与上传。
         </p>
         <div class="doc-actions">
           <a

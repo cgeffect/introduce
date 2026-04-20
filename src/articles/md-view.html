@@ -25,7 +25,7 @@
     <script>
       (function () {
         var ALLOWED = [
-          "../resource/pro8/AI智能剪辑行业洞察报告.md",
+          "../resource/pro8/个人对AI智能剪辑的行业理解.md",
           "../resource/pro8/美妆行业AI智能剪辑全流程可行性方案.md",
           "../resource/pro8/直播切片.md",
           "../resource/pro8/视频原声类剪辑.md",
@@ -69,6 +69,10 @@
             return res.text();
           })
           .then(function (text) {
+            text = text.replace(
+              /^\s*>?\s*（注：文档部分内容可能由 AI 生成）\s*$/gm,
+              ""
+            );
             marked.setOptions({ breaks: true, gfm: true });
             rootEl.innerHTML = marked.parse(text);
             var base = path.split("/").pop().replace(/\.md$/, "");

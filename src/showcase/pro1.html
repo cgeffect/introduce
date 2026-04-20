@@ -74,7 +74,7 @@
           <video controls preload="metadata" playsinline>
             <source src="../resource/pro1/4_web_LLM.mp4" type="video/mp4" />
           </video>
-          <figcaption>4 · 智能辅助编排</figcaption>
+          <figcaption>4 · 使用LLM对话来编辑视频</figcaption>
         </figure>
         <figure>
           <video controls preload="metadata" playsinline>
@@ -91,7 +91,7 @@
           <li><strong>图形与合成：</strong>OpenGL 或等价 GPU 图形接口承担画布合成、纹理上传与特效链路；桌面侧可结合原生窗口与高性能渲染循环。</li>
           <li><strong>桌面宿主：</strong>Electron（Chromium + Node）用于整合 Web UI 与本地原生模块，主进程与渲染进程分工，便于复用 C++ 编解码与渲染动态库。</li>
           <li><strong>Web 渲染：</strong>浏览器侧通过 WebGL / Canvas 或 WebAssembly 承载与桌面侧<strong>语义对齐</strong>的预览与编辑渲染路径（具体模块划分依工程裁剪）。</li>
-          <li><strong>实时传输：</strong>WebRTC 用于低延迟视频流与必要时的信令，实现监看端与剪辑端的秒级反馈；可配合 STUN/TURN 策略适配跨网段场景。</li>
+          <li><strong>实时传输：</strong>WebRTC 用于低延迟视频流；信令由 <strong>LiveServer 内嵌的 Socket</strong>（如 WebSocket）承载，与 SRTP 媒体面分离，实现监看端与剪辑端的秒级反馈；可配合 STUN/TURN 策略适配跨网段场景。</li>
           <li><strong>语言与构建：</strong>性能敏感路径以 <strong>C++</strong> 为主；脚本与工具链可用 Node / Shell；工程组织上常见 CMake 或各平台 IDE 工程。</li>
           <li><strong>媒体处理：</strong>时间线解码、封装与导出侧可衔接 FFmpeg 等成熟组件，保证格式覆盖与工程可控性。</li>
         </ul>
@@ -102,9 +102,6 @@
         <p>
           智能化能力通常以<strong>异步服务或本地插件</strong>形式接入：先生成结构化建议（分镜、文案、参数包），再写回时间线或包装轨道，避免在实时预览线程内阻塞用户操作。
         </p>
-        <p>
-          上述为工程实现层面的归纳，便于技术评审与集成评估；产品对外承诺以第二节能力描述与演示效果为准，并可持续按业务场景扩展编解码格式、传输策略与 Web 端编辑深度。
-        </p>
         <div class="doc-actions">
           <a
             class="btn btn--primary"
@@ -114,11 +111,81 @@
             >打开 GitHub 仓库</a
           >
         </div>
+
+        <h2 id="webrtc-native-web">六、专题：WebRTC 下 Native 与 Web 的交互（只推只收 + 信令）</h2>
+        <p>
+          监看链路可以刻意做成<strong>单向媒体</strong>：<strong>Native（桌面 / LiveServer 一类进程）只负责发送音视频轨</strong>；<strong>浏览器端只接收并渲染</strong>，不向对端回推摄像头 / 麦克风画面。这样外端权限简单、带宽与隐私边界清晰，也避免在监看页误开上行导致回声或多余编码。
+        </p>
+        <p>
+          <strong>信令（Signaling）</strong>不在 WebRTC 标准里规定传输方式，但必须有一条<strong>可靠、有序</strong>的通道，用来交换 <strong>SDP</strong>（会话描述：编解码、SSRC、方向等）与 <strong>ICE candidate</strong>（网络路径候选）。在本工程形态里，信令<strong>并不是单独拆出去部署的微服务</strong>，而是<strong>做在 LiveServer 进程内部</strong>：用 <strong>Socket</strong>（实现上常见为 <strong>WebSocket</strong>）在固定端口监听，浏览器作为客户端连上来，完成 SDP/ICE 的文本往返；LiveServer 内再把消息交给同一进程里的 WebRTC 栈。音视频则仍走 <strong>WebRTC 媒体面（SRTP）</strong>，与 Socket 控制面分离——本机预览时常落在回环上，跨 NAT 时再按需走 <strong>STUN/TURN</strong>，Socket 通道<strong>不承担 RTP 媒体载荷</strong>。
+        </p>
+
+        <h3>6.1 角色与媒体方向</h3>
+        <ul>
+          <li>
+            <strong>Native 发送端：</strong>从时间线合成结果得到编码后的帧（或硬件编码器输出），通过 WebRTC 栈作为 <strong>sendonly</strong>（或等价「仅出站」）轨挂到
+            <code style="font-family: var(--mono)">RTCPeerConnection</code>；不订阅浏览器侧的上行轨。
+          </li>
+          <li>
+            <strong>Web 接收端：</strong>使用标准 <code style="font-family: var(--mono)">RTCPeerConnection</code>，以 <strong>recvonly</strong> 或「只添加远端轨、本地不调用
+            <code style="font-family: var(--mono)">addTrack</code> 做上行」的方式建链；远端 <code style="font-family: var(--mono)">ontrack</code> 里把
+            <code style="font-family: var(--mono)">MediaStream</code> 绑到 <code style="font-family: var(--mono)">&lt;video&gt;</code> 即可监看。
+          </li>
+          <li>
+            <strong>编辑协议（可选）：</strong>时间线 JSON、参数同步等可走 <strong>LiveServer 同一 Socket 上的独立消息类型</strong>，或单独 <code style="font-family: var(--mono)">RTCDataChannel</code>；与单向音视频并不冲突，但需在业务层区分「控制消息」与「媒体轨」。
+          </li>
+        </ul>
+
+        <h3>6.2 LiveServer 内 Socket 信令与建链顺序</h3>
+        <p>典型顺序如下（信令端口随 LiveServer 拉起；同机实验时 ICE 常落在回环地址上）：</p>
+        <ol>
+          <li><strong>Web</strong> 与 <strong>LiveServer 内置的 Socket 服务</strong>（如 WebSocket）建立长连接，完成会话 / 房间注册等应用层约定。</li>
+          <li><strong>LiveServer</strong> 内在 WebRTC 栈创建 <strong>offer</strong>（SDP），由 Socket 线程将 SDP <strong>推给浏览器</strong>。</li>
+          <li><strong>Web</strong> 将远端描述设为该 offer 后生成 <strong>answer</strong>，<strong>经同一 Socket 连接回传</strong>；LiveServer 写入本端 <code style="font-family: var(--mono)">RTCPeerConnection</code>。</li>
+          <li><strong>ICE candidate</strong> 仍以文本消息在 Socket 上双向交换（可 trickle），直到 ICE 连通。</li>
+          <li><strong>媒体面</strong>为浏览器 <code style="font-family: var(--mono)">RTCPeerConnection</code> 与 LiveServer 内 PeerConnection 之间的 <strong>SRTP</strong>，与 Socket 控制面分离；跨复杂网络时再经 <strong>TURN</strong> 等，与是否内嵌信令无关。</li>
+        </ol>
+
+        <figure class="diagram-block" aria-label="LiveServer 内嵌 Socket 信令与 Web 收流">
+          <pre class="mermaid">
+flowchart LR
+  subgraph LS["LiveServer（Native，单进程）"]
+    ENC[时间线合成与编码] --> PCN["PeerConnection sendonly"]
+    SOCK["内置 Socket 信令\n如 WebSocket 监听"]
+    SOCK -.->|进程内交给 WebRTC| PCN
+  end
+  subgraph WEB["Web 接收端"]
+    CLI["Socket 客户端"]
+    PCW["PeerConnection recvonly"]
+    VID[video 元素渲染]
+    CLI <-->|SDP / ICE 文本| SOCK
+    PCW --> VID
+    PCW <-->|SRTP 媒体| PCN
+  end
+          </pre>
+          <figcaption>
+            图：信令跑在 LiveServer 内的 Socket 上，不经单独「信令微服务」；媒体仍为 WebRTC SRTP。单向监看时 LiveServer 侧 sendonly、Web 侧 recvonly。
+          </figcaption>
+        </figure>
+
+        <p class="meta">
+          与本方案同源的开源形态、本机 WebSocket 端口与浏览器 API 细节，见技术文章
+          <a href="../articles/e2e-preview-system.html">《基于 WebRTC 实现的端到端渲染预览》</a>。
+        </p>
       </div>
     </article>
     <footer class="site-footer">
       <p>王腾飞 · <span id="year"></span></p>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "neutral",
+        securityLevel: "loose",
+        flowchart: { htmlLabels: true, curve: "basis" },
+      });
+    </script>
     <script src="../js/app.js" defer></script>
   </body>
 </html>

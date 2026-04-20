@@ -3,25 +3,227 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>云剪辑任务调度与 RocketMQ 编排 · 王腾飞</title>
+    <meta
+      name="description"
+      content="云剪辑系统设计进阶：RocketMQ 分布式粗粒度调度、Worker 内自定义任务队列与 DAG 编排、资源隔离与背压。"
+    />
+    <title>云剪辑系统设计进阶：RocketMQ 与任务队列编排 · 王腾飞</title>
     <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
     <article class="article-page">
       <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
       <header>
-        <h1>云剪辑任务调度与 RocketMQ 编排</h1>
-        <p class="meta">消息队列 · 云渲染、转码与合成</p>
+        <h1>云剪辑系统设计进阶：基于 RocketMQ 的分布式调度与自定义任务队列编排</h1>
+        <p class="meta">消息队列 · Pipeline · DAG · Worker 内调度</p>
       </header>
       <div class="prose">
+        <h2>一、问题背景：从「任务执行」到「系统级编排能力」</h2>
+        <p>在云剪辑场景中，单纯的「视频处理能力」并不是瓶颈，真正的挑战在于：</p>
+        <ul>
+          <li><strong>业务高度不确定</strong>：不同客户需要不同处理链路（字幕、贴图、模板、转码、AI 生成等）</li>
+          <li><strong>计算密集与 IO 密集混合</strong>：解码、渲染、编码具有不同资源特征</li>
+          <li><strong>任务粒度不均衡</strong>：一个任务可能耗时毫秒级，也可能分钟级</li>
+          <li><strong>吞吐与延迟的平衡</strong>：既要批量处理，也要快速响应</li>
+        </ul>
+        <p>因此，系统目标不是「执行任务」，而是：</p>
+        <blockquote>
+          <p>构建一个具备<strong>调度能力、编排能力、并发控制能力</strong>的云剪辑执行引擎。</p>
+        </blockquote>
+
+        <h2>二、系统总体架构（进阶版）</h2>
+        <pre class="article-code"><code>客户端请求
+   ↓
+任务抽象（Pipeline DSL）
+   ↓
+任务切片（Job → Task Graph）
+   ↓
+RocketMQ 分发（分布式调度）
+   ↓
+Worker 进程（多线程 + 自定义任务队列）
+   ↓
+DAG 调度器（本地）
+   ↓
+执行单元（解码 / 渲染 / 编码 / AI）
+   ↓
+结果聚合 &amp; 输出</code></pre>
+
+        <h2>三、RocketMQ 的角色：分布式「粗粒度调度器」</h2>
         <p>
-          RocketMQ 在高并发剪辑任务下的 topic 与消费者组划分、失败重试与死信处理，以及与 FFmpeg / GPU
-          渲染节点的衔接与状态回传。
+          我们基于 Apache RocketMQ 构建分布式调度层，但需要明确一点：<strong>RocketMQ 只负责任务分发（粗粒度），不负责执行侧的细粒度优化。</strong>
         </p>
-        <h2>涉及主题</h2>
+
+        <h3>3.1 默认模型的局限性</h3>
+        <p>以 RocketMQ C++ Consumer 为例，常见形态是：</p>
+        <ul>
+          <li>多线程消费</li>
+          <li>每线程批量拉取消息</li>
+          <li><strong>线程内串行执行</strong></li>
+        </ul>
+        <p>于是会出现：</p>
+        <pre class="article-code"><code>线程级并发 ≠ 任务级并发</code></pre>
+        <p><strong>示例：</strong>8 线程 × 每线程 30 个任务，默认执行上等价于只有 <strong>8 路并发</strong>在跑业务逻辑，而不是 240 路任务级并发。</p>
+
+        <h2>四、核心优化：自定义任务队列（Custom Task Queue）</h2>
+        <p>为解决上述问题，引入第二层调度机制：</p>
+        <blockquote>
+          <p>在 <strong>Worker 内部</strong>构建「任务级并发调度系统」。</p>
+        </blockquote>
+
+        <h3>4.1 分层调度模型</h3>
+        <pre class="article-code"><code>RocketMQ（进程级调度）
+   ↓
+Consumer 线程（线程级调度）
+   ↓
+自定义任务队列（任务级调度） ← 核心
+   ↓
+执行线程池（资源调度）</code></pre>
+
+        <h3>4.2 自定义任务队列设计目标</h3>
+        <ul>
+          <li>提供任务级并发，突破「每消费线程串行」的限制</li>
+          <li>支持不同类型任务的调度策略</li>
+          <li>控制资源（CPU / IO / GPU）</li>
+          <li>支持任务依赖（DAG）</li>
+        </ul>
+
+        <h3>4.3 核心结构设计</h3>
+        <pre class="article-code"><code>struct TaskWrapper {
+    std::string taskId;
+    std::function&lt;void()&gt; func;
+    int priority;
+    std::vector&lt;std::string&gt; dependencies;
+};</code></pre>
+        <p><strong>队列划分示意：</strong></p>
+        <ul>
+          <li>ReadyQueue：依赖已满足、可调度</li>
+          <li>WaitingQueue：依赖未满足</li>
+          <li>RunningQueue：执行中</li>
+        </ul>
+
+        <h3>4.4 执行流程</h3>
+        <ol>
+          <li>RocketMQ 拉取一批任务</li>
+          <li>转换为 TaskWrapper</li>
+          <li>加入任务队列</li>
+          <li>DAG 调度器分析依赖关系</li>
+          <li>就绪任务进入线程池执行</li>
+          <li>执行完成 → 更新依赖</li>
+          <li>触发下游任务</li>
+        </ol>
+
+        <h3>4.5 并发执行模型（关键）</h3>
+        <pre class="article-code"><code>Consumer 线程（例如 8 个）
+    ↓
+每个线程 → 提交任务到统一队列
+    ↓
+统一任务队列（全局或分片）
+    ↓
+线程池（N 核规模）</code></pre>
+        <p>此时实际并发可以提升到 <strong>CPU 核心数级别</strong>（例如 32 / 64），由线程池与队列策略共同约束，而不是被消费线程数硬卡在 8。</p>
+
+        <h2>五、Pipeline 编排：从线性流程到 DAG</h2>
+        <p>系统核心抽象为 Pipeline；下面是一个增强版 JSON 示意（DSL 形态可按业务再封装）：</p>
+        <pre class="article-code"><code>{
+  "pipeline": {
+    "name": "广告视频生成",
+    "tasks": [
+      { "id": "decode", "className": "VideoDecodeTask" },
+      { "id": "audio", "className": "AudioProcessTask" },
+      { "id": "render", "className": "RenderTask" },
+      { "id": "encode", "className": "EncodeTask" }
+    ],
+    "dependencies": [
+      { "from": "decode", "to": "render" },
+      { "from": "audio", "to": "render" },
+      { "from": "render", "to": "encode" }
+    ]
+  }
+}</code></pre>
+        <p><strong>本质：</strong>Pipeline 即 <strong>DAG（有向无环图）</strong>；边表示数据或语义上的先后约束，节点表示可替换的执行单元。</p>
+
+        <h2>六、组件化任务系统（可插拔执行单元）</h2>
         <p>
-          任务模型与优先级、租户隔离、队列堆积与渲染耗时的观测，以及视频质量回归与发布流程的衔接。
+          通过<strong>任务工厂 + 类型注册表</strong>（配置里的 <code style="font-family: var(--mono)">className</code> 映射到具体 C++
+          类型与构造器），实现与「反射式发现」相近的体验：<strong>任务 = 可注册、可发现、可动态创建</strong>的组件。C++
+          无 JVM 式内置反射，一般用宏注册、静态初始化或插件入口完成绑定。
         </p>
+        <ul>
+          <li>动态加载或按配置实例化任务</li>
+          <li>支持插件化扩展</li>
+          <li>解耦 Pipeline 描述与具体执行逻辑</li>
+        </ul>
+        <pre class="article-code"><code>auto task = TaskFactory::createTask("RenderTask");
+task-&gt;execute();</code></pre>
+        <p>从而做到 <strong>配置驱动执行</strong>：改 JSON / 配置即可改链路，而不必改调度框架代码。</p>
+
+        <h2>七、DAG 调度器（本地执行核心）</h2>
+        <p>自定义调度器负责：</p>
+        <ul>
+          <li><strong>依赖管理</strong>：taskA → taskB；taskA 完成后触发 taskB；支持多依赖汇聚（fan-in）</li>
+          <li><strong>状态机</strong>：WAITING → READY → RUNNING → DONE</li>
+          <li><strong>调度策略</strong>：可扩展为 FIFO、优先级、资源感知（CPU / GPU）等</li>
+        </ul>
+
+        <h2>八、资源隔离与优化（进阶）</h2>
+        <h3>8.1 不同任务类型隔离</h3>
+        <ul>
+          <li>解码任务：偏 IO</li>
+          <li>渲染任务：偏 GPU</li>
+          <li>编码任务：偏 CPU / 专用编码器</li>
+        </ul>
+        <p>可拆分为多类线程池，例如 DecodePool / RenderPool / EncodePool，避免互相抢占默认池导致尾延迟放大。</p>
+
+        <h3>8.2 背压（Backpressure）</h3>
+        <p>当队列堆积过多时，可以：</p>
+        <ul>
+          <li>限制 MQ 消费速率或暂停拉取</li>
+          <li>动态收缩 / 扩容线程池或队列水位阈值</li>
+        </ul>
+
+        <h3>8.3 批处理优化</h3>
+        <p>例如多帧合并渲染、批量编码等，在吞吐优先场景下与低延迟路径分开建模。</p>
+
+        <h2>九、完整执行链路（进阶版）</h2>
+        <pre class="article-code"><code>用户请求
+   ↓
+生成 Pipeline（JSON DSL）
+   ↓
+投递 RocketMQ
+   ↓
+Worker 拉取任务
+   ↓
+进入自定义任务队列
+   ↓
+DAG 调度器分析依赖
+   ↓
+线程池并发执行
+   ↓
+结果汇总
+   ↓
+编码输出</code></pre>
+
+        <h2>十、系统核心价值</h2>
+        <ul>
+          <li><strong>解耦调度与执行</strong>：RocketMQ 做分发；本地调度器做执行与并发优化</li>
+          <li><strong>任务原子化</strong>：解码 / 渲染 / 编码 / AI 等节点任意组合</li>
+          <li><strong>高并发能力</strong>：MQ 级分发 + 任务级并发，提高资源利用率</li>
+          <li><strong>可扩展性</strong>：新增任务类型以注册新执行单元为主，不必推翻调度框架</li>
+        </ul>
+
+        <h2>十一、总结</h2>
+        <p>系统的本质升级在于：从「任务执行框架」升级为「任务调度系统」。核心三层为：</p>
+        <ol>
+          <li><strong>RocketMQ</strong>：分布式粗粒度调度与投递</li>
+          <li><strong>自定义任务队列</strong>：任务级并发与队列治理</li>
+          <li><strong>DAG 调度器</strong>：依赖与状态驱动的执行编排</li>
+        </ol>
+        <blockquote>
+          <p>
+            在云剪辑场景中，真正的挑战并不在于「如何处理视频」，而在于「如何组织处理过程」。通过将任务拆解为原子组件、用
+            Pipeline 描述依赖，并结合 RocketMQ 与本地任务队列构成分层调度体系，可以得到高并发、可扩展、易演进的云剪辑引擎，使系统从功能实现走向<strong>能力平台</strong>，支撑多业务与多场景持续迭代。
+          </p>
+        </blockquote>
       </div>
     </article>
     <footer class="site-footer">
