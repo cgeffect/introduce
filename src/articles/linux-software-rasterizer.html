@@ -18,6 +18,9 @@
         <p>
           在 Linux 的服务端或 CI 场景里，常会遇到三类问题：没有可用 GPU、驱动环境不稳定、以及对渲染结果可重复性要求极高。软光栅（Software Rasterizer）在这些场景下的价值是：不依赖显卡与图形驱动，把渲染链路收敛到 CPU 与内存模型内，便于部署、调试和结果复现。
         </p>
+        <p>
+          本文所说的“软光栅实现”，后端并非从零手写完整 rasterizer，而是基于 <strong>SwiftShader</strong> 作为 CPU 图形后端来落地：应用层仍按图形 API 调用，实际在 CPU 上完成渲染执行，再输出结果用于预览或离线导出。
+        </p>
 
         <h2>二、软光栅渲染管线（最小闭环）</h2>
         <p>典型流程可以抽象为：</p>
@@ -30,6 +33,9 @@
 → 帧缓冲输出（RGBA / BMP / PNG）</code></pre>
         <p>
           核心思想是把 GPU 固定功能与着色阶段，在 CPU 端用可控的数据结构和算法重建。虽然性能上限不如硬件渲染，但在离线渲染、测试基线、无卡环境中非常实用。
+        </p>
+        <p>
+          在工程实现上，可将 SwiftShader 视作“CPU 侧图形驱动层”：应用层继续保持标准图形调用路径，通过加载 SwiftShader 的库与 ICD（Vulkan 场景）把调用落到 CPU 执行，减少上层业务代码改动。
         </p>
 
         <h2>三、Linux 上的工程落地步骤</h2>
@@ -119,6 +125,18 @@ cmake --build build -j
 
 # 运行（按项目实际可执行名替换）
 ./build/sw_render_demo</code></pre>
+        <p><strong>若使用 SwiftShader 作为后端，建议补充以下步骤：</strong></p>
+        <pre class="article-code"><code># 1) 获取并构建 SwiftShader
+git clone https://swiftshader.googlesource.com/SwiftShader
+cd SwiftShader
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+
+# 2) 指向 SwiftShader 的 Vulkan ICD（示例）
+export VK_ICD_FILENAMES=/path/to/SwiftShader/build/Linux/vk_swiftshader_icd.json
+
+# 3) 运行你的程序（应用将通过 SwiftShader 在 CPU 上执行图形调用）
+/path/to/SwRender/build/sw_render_demo</code></pre>
         <p>
           若你只做离线渲染（不打开窗口），可使用无窗口入口，把输出写到
           <code style="font-family: var(--mono)">output.png</code>。若需要可视化调试，再使用上面的 OpenGL 初始化壳。
@@ -148,7 +166,7 @@ cmake --build build -j
 
         <h2>九、结语</h2>
         <p>
-          如果你的目标是“在 Linux 上稳定出图、可复现、可批处理”，软光栅是一条很实用的工程路线。它的价值不在极限 FPS，而在可控性与部署确定性。先把最小闭环跑通，再按业务需求逐步加功能与优化，通常是最稳妥的推进方式。
+          如果你的目标是“在 Linux 上稳定出图、可复现、可批处理”，基于 SwiftShader 的软光栅路线是一条很实用的工程方案。它的价值不在极限 FPS，而在可控性与部署确定性。先把最小闭环跑通，再按业务需求逐步加功能与优化，通常是最稳妥的推进方式。
         </p>
 
         <div class="doc-actions">
