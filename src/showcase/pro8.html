@@ -19,37 +19,25 @@
       </header>
 
       <ul class="subnav">
-        <li><a href="#insight">AI 剪辑个人理解</a></li>
         <li><a href="#beauty">美妆方案</a></li>
         <li><a href="#live">直播切片</a></li>
         <li><a href="#voice">视频原声类</a></li>
         <li><a href="#sources">源文件</a></li>
       </ul>
 
-      <div class="prose" id="insight">
-        <h2>一、个人对 AI 智能剪辑的行业理解</h2>
-        <p>
-          成稿为笔者个人对赛道的理解，从「配音视频 / 营销短视频」早入局视角复盘 2022 年以来技术、资本与需求变化，并概括行业从「自动化替代人工」走向「生成式 + 人机协同 + 垂直场景」的主线。
-        </p>
-        <p>
-          核心观察包括：技术与场景脱节、素材复用与合规成本、轻量化与专业性两极分化、以及「全品类通吃」相对「垂直标准化」的取舍。文中结合
-          ToB SaaS 的交付经验，讨论标准化流程与可规模化变现的前提，并延伸到 2026 年合规（版权、AI 标识）与多元计费形态；属个人理解而非全行业权威结论，请结合语境使用。
-        </p>
-      </div>
-
       <div class="prose stack" id="beauty">
-        <h2>二、美妆行业 AI 智能剪辑全流程方案</h2>
+        <h2>一、美妆行业 AI 智能剪辑流程方案探索</h2>
         <p>
-          针对「口播语义与画面精准匹配」痛点，方案给出从文案结构化输入、语义标签体系（产品核心 / 面部关联 / 使用方式 / 效果承诺）、Whisper
-          转写 + 轻量分类模型打标，到素材上传校验、FFmpeg scene 分镜、自动合成与客户预览二次编辑的闭环。
+          针对「口播语义与画面精准匹配」痛点，这里给出一个个人探索的方案路径：从文案结构化输入、语义标签体系（产品核心 / 面部关联 / 使用方式 / 效果承诺）、Whisper
+          转写 + 轻量分类模型打标，到素材上传校验、FFmpeg scene 分镜、自动合成与客户预览二次编辑闭环。
         </p>
         <p>
-          目标客群为月预算约 1–2 万的中小 B 端美妆客户，强调竖屏投放、3 秒抓眼与画质无损，与抖音 / 视频号投放习惯对齐。
+          定位为方案探索（而非已规模化产品能力），目标客群暂按月预算约 1–2 万的中小 B 端美妆客户设定，强调竖屏投放、3 秒抓眼与画质无损。
         </p>
       </div>
 
       <div class="prose stack" id="live">
-        <h2>三、大模型驱动直播切片</h2>
+        <h2>二、大模型驱动直播切片</h2>
         <p>
           链路强调「高光筛选 → 配音 / 配文字 → 固定 timeline 或 JSON → 云剪辑」：直播录屏经 FFmpeg 统一格式、剔除黑屏与无效段；Whisper
           转写后由大模型按转化导向 Prompt 筛选福利钩子、卖点演示与下单引导类高光；再生成配文字与 TTS，组装为不可变协议提交云剪辑服务并监控任务状态。
@@ -60,26 +48,20 @@
       </div>
 
       <div class="prose stack" id="voice">
-        <h2>四、视频原声类剪辑（汽车 vs 无原声营销）</h2>
+        <h2>三、视频原声类剪辑（汽车 vs 无原声营销）</h2>
         <p>
           文档对比两类形态：汽车类依赖原生声 + ASR 文案与画面对齐；无原声类（如支付宝场景）由文案驱动 + TTS，再统一应用关键词特效与音效卡点。二者在「场景开篇 → 卖点递进 → 价值强化 → 转化收尾」结构上一致，并给出巨量系投放下的数据化表述与文字 / 音效规范（对比度、描边、音效种类上限等）。
         </p>
       </div>
 
       <div class="prose stack" id="sources">
-        <h2>五、成稿阅读（排版 Markdown）</h2>
+        <h2>四、成稿阅读（排版 Markdown）</h2>
         <p>以下链接在站内打开排版阅读页（非纯文本 <code style="font-family: var(--mono)">.md</code> 源码视图）。本地编辑仍以仓库内 <code style="font-family: var(--mono)">resource/pro8/*.md</code> 为准。</p>
         <ul>
           <li>
             <a
-              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E4%B8%AA%E4%BA%BA%E5%AF%B9AI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E7%9A%84%E8%A1%8C%E4%B8%9A%E7%90%86%E8%A7%A3.md&amp;title=%E4%B8%AA%E4%BA%BA%E5%AF%B9AI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E7%9A%84%E8%A1%8C%E4%B8%9A%E7%90%86%E8%A7%A3"
-              >个人对AI智能剪辑的行业理解.md</a
-            >
-          </li>
-          <li>
-            <a
-              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88.md&amp;title=%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88"
-              >美妆行业AI智能剪辑全流程可行性方案.md</a
+              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88.md&amp;title=%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E6%B5%81%E7%A8%8B%E6%96%B9%E6%A1%88%E6%8E%A2%E7%B4%A2"
+              >美妆行业AI智能剪辑流程方案探索.md</a
             >
           </li>
           <li>
