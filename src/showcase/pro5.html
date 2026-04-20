@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro5 · skia-macos 图文渲染 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro5 · macOS · Skia 图文渲染</p>
+        <h1>skia-macos 图文渲染系统</h1>
+        <p class="meta">Skia 图形栈在 macOS 上做模板渲染与高清导出。</p>
+      </header>
+      <div class="prose">
+        <h2>项目介绍</h2>
+        <p>
+          基于 Skia 在 macOS 上搭建的图文渲染能力，用于模板化制图、批量出图与与设计规范一致的平面物料生产；可与业务系统对接，由结构化数据驱动版式与导出。
+        </p>
+        <p>
+          相关素材与说明可置于 <code style="font-family: var(--mono)">resource/pro5/</code>。
+        </p>
+        <h2>技术介绍</h2>
+        <p>
+          渲染侧以 Skia 为核心做矢量与位图合成，字体子集化、图片解码与色彩空间在导出前一次性烘焙；宿主侧常用 Swift/Objective-C++ 桥接，版式数据可由 JSON 或业务中台下发。
+        </p>
+        <div class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/cgeffect/skia-macos"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 GitHub 仓库</a
+          >
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

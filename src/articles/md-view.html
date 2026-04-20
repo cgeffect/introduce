@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>文档阅读 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" id="md-back" href="index.html#industry-notes">← 返回技术文章与笔记</a>
+      <header>
+        <p class="meta">Markdown 阅读</p>
+        <h1 id="doc-title">加载中…</h1>
+        <p class="meta" id="doc-path"></p>
+      </header>
+      <p id="md-status" class="meta">正在加载文档…</p>
+      <div id="md-root" class="prose md-body" hidden></div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="../js/app.js" defer></script>
+    <script>
+      (function () {
+        var ALLOWED = [
+          "../resource/pro8/AI智能剪辑行业洞察报告.md",
+          "../resource/pro8/美妆行业AI智能剪辑全流程可行性方案.md",
+          "../resource/pro8/直播切片.md",
+          "../resource/pro8/视频原声类剪辑.md",
+        ];
+        var params = new URLSearchParams(location.search);
+        var rawPath = params.get("path");
+        var path = rawPath ? decodeURIComponent(rawPath) : "";
+        var titleOverride = params.get("title");
+        var statusEl = document.getElementById("md-status");
+        var rootEl = document.getElementById("md-root");
+        var titleEl = document.getElementById("doc-title");
+        var pathEl = document.getElementById("doc-path");
+
+        function fail(msg) {
+          if (statusEl) statusEl.textContent = msg;
+          if (titleEl) titleEl.textContent = "无法打开文档";
+        }
+
+        if (!path || ALLOWED.indexOf(path) === -1) {
+          fail("未指定文档，或文档不在允许列表内。请从站内入口链接进入。");
+          return;
+        }
+
+        var backEl = document.getElementById("md-back");
+        var backRaw = params.get("back");
+        if (backEl && backRaw) {
+          try {
+            var b = decodeURIComponent(backRaw);
+            if (/^\.\.\//.test(b) || /^[^/].*\.html$/.test(b)) {
+              backEl.href = b;
+              backEl.textContent = "← 返回上一页";
+            }
+          } catch (e) {}
+        }
+
+        pathEl.textContent = path.replace(/^\.\.\//, "");
+
+        fetch(path)
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.text();
+          })
+          .then(function (text) {
+            marked.setOptions({ breaks: true, gfm: true });
+            rootEl.innerHTML = marked.parse(text);
+            var base = path.split("/").pop().replace(/\.md$/, "");
+            titleEl.textContent = titleOverride
+              ? decodeURIComponent(titleOverride)
+              : base;
+            document.title = titleEl.textContent + " · 王腾飞";
+            statusEl.hidden = true;
+            rootEl.hidden = false;
+          })
+          .catch(function () {
+            fail("加载失败。请确认通过本地或线上 HTTP 服务打开站点（直接 file:// 打开时浏览器可能禁止读取本地文件）。");
+          });
+      })();
+    </script>
+  </body>
+</html>

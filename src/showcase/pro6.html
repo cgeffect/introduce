@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro6 · WebRTC 通话 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro6 · 实时通信 · 点对点与小型会话</p>
+        <h1>webrtc 的通话系统</h1>
+        <p class="meta">信令与媒体通道解耦，优先 P2P，必要时走 TURN。</p>
+      </header>
+      <div class="prose">
+        <h2>能力概述</h2>
+        <p>
+          面向需要低延迟、可互通语音与画面的场景：呼叫建立与状态同步、媒体通道与弱网策略等，可与业务账号与工单系统对接；适合一对一客服视频、远程支持、小班课与社交通话等形态扩展。
+        </p>
+        <p>
+          演示录屏、架构图或信令说明可放在 <code style="font-family: var(--mono)">resource/pro6/</code> 并在本页补充引用。
+        </p>
+        <h2>技术介绍</h2>
+        <p>
+          媒体面常用 WebRTC 标准栈：SDP 协商、ICE 候选、DTLS-SRTP 加密传输；音频侧 AEC/AGC/NS，视频侧自适应码率与关键帧请求。信令可落在 WebSocket / MQTT 等任意可靠通道，与业务账号体系对接。
+        </p>
+        <div class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/cgeffect/webrtc_p2p"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 GitHub 仓库</a
+          >
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

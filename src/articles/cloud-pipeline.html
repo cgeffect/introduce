@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>云剪辑任务调度与 RocketMQ 编排 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>云剪辑任务调度与 RocketMQ 编排</h1>
+        <p class="meta">消息队列 · 云渲染、转码与合成</p>
+      </header>
+      <div class="prose">
+        <p>
+          RocketMQ 在高并发剪辑任务下的 topic 与消费者组划分、失败重试与死信处理，以及与 FFmpeg / GPU
+          渲染节点的衔接与状态回传。
+        </p>
+        <h2>涉及主题</h2>
+        <p>
+          任务模型与优先级、租户隔离、队列堆积与渲染耗时的观测，以及视频质量回归与发布流程的衔接。
+        </p>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

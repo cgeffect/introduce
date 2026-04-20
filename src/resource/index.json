@@ -1,0 +1,45 @@
+{
+  "technicalProjects": [
+    {
+      "id": "pro1",
+      "name": "e2e-rendering",
+      "github": "https://github.com/cgeffect/e2e-rendering"
+    },
+    {
+      "id": "pro2",
+      "name": "Linux渲染系统",
+      "resource": "pro2/云剪辑系统技术介绍.pdf"
+    },
+    {
+      "id": "pro3",
+      "name": "remotion",
+      "github": "https://github.com/cgeffect/remotion-render"
+    },
+    {
+      "id": "pro4",
+      "name": "AutoClip",
+      "github": "https://github.com/cgeffect/AutoClip"
+    },
+    {
+      "id": "pro5",
+      "name": "skia-macos 图文渲染系统",
+      "github": "https://github.com/cgeffect/skia-macos"
+    },
+    {
+      "id": "pro6",
+      "name": "webrtc的通话系统",
+      "github": "https://github.com/cgeffect/webrtc_p2p"
+    },
+    {
+      "id": "pro7",
+      "name": "专业视频编辑应用",
+      "github": "https://github.com/cgeffect/YouCut/tree/1.1.1"
+    }
+  ],
+  "industryInsights": [
+    {
+      "id": "pro8",
+      "name": "营销视频剪辑行业现状分析"
+    }
+  ]
+}

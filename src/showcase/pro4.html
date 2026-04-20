@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro4 · AutoClip · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro4 · 自动成片 / 故事线 → Timeline</p>
+        <h1>AutoClip</h1>
+        <p class="meta">故事线 / 脚本 → 可执行时间线，服务云剪辑与自动成片链路。</p>
+      </header>
+      <div class="prose">
+        <h2>项目介绍</h2>
+        <p>
+          AutoClip 面向「故事线 / 口播脚本 → 可渲染 Timeline」的自动化编排：结合大模型与规则，将文案、分镜、素材匹配与轨道装饰串联为一条可交给云剪辑或端侧渲染执行的生产链路。
+        </p>
+        <p>
+          演示成片、架构图或接口说明见 <code style="font-family: var(--mono)">resource/pro4/</code>；可与
+          <a href="pro2.html">pro2</a>、<a href="../articles/index.html#industry-notes">行业笔记</a> 对照阅读。
+        </p>
+        <h2>与站内其它模块的关系</h2>
+        <p>
+          可与首页 <a href="../index.html#experience">工作经历</a> 中云剪辑平台阶段的 AI 自动成片方向对照阅读；本页侧重开源仓库与本地素材索引。
+        </p>
+        <h2>技术介绍</h2>
+        <p>
+          典型实现上会对接大模型或规则引擎产出结构化分镜与素材槽位，再映射为内部 Timeline JSON，由云剪辑 worker 消费；任务状态、重试与死信可与消息队列编排（参见 pro2 云剪辑文档中的管线思路）。
+        </p>
+        <div class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/cgeffect/AutoClip"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 GitHub 仓库</a
+          >
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

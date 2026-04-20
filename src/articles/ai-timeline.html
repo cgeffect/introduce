@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Timeline 自动成片链路拆解 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>AI Timeline 自动成片链路拆解</h1>
+        <p class="meta">从营销 brief 到可渲染时间线</p>
+      </header>
+      <div class="prose">
+        <h2>一、技术背景</h2>
+        <p>
+          短视频与广告批量生产里，常见诉求是：运营或销售给一段「卖点 brief」，系统要在素材库里自动挑出画面，再对齐口播节奏，生成一版可发渠道的成片或可二次编辑的时间线。传统做法是人工选镜 + 非编里拖拽，成本高且难以规模化。大模型与向量检索成熟之后，自然语言可以驱动「分镜策划」和「检索描述」，但<strong>从一段文案到非编里真实可渲染的轨道结构</strong>仍需要清晰的工程分层：否则检索结果无法解释、时间线对不齐口播、也无法接入现有渲染集群。
+        </p>
+
+        <h2>二、为什么要这样做</h2>
+        <p>
+          若把「理解 brief、搜素材、打分、写时间线」全部写进一个单体脚本，很快会遇到三类问题：<strong>检索后端要独立扩容</strong>（向量与业务库不应绑在编排进程里）；<strong>大模型输出要可校验、可回归</strong>（不宜做成开放式 Agent 随意调工具）；<strong>时间线协议要稳定</strong>（供桌面/Web/云渲染消费，与 LLM 提示词迭代解耦）。因此典型做法是：策划与检索句用固定编排管线生成；召回走标准 HTTP；在 TopK 上用可解释的加权规则选一条；最后用纯数据层组装双轨时间线（画面 + 文案），交给已有引擎合成。这样产品可以分阶段上线：先「时间线草案」再迭代打分与 TTS。
+        </p>
+
+        <h2>三、原理与架构（高层）</h2>
+        <p>
+          整条链路在概念上分为两段。<strong>素材侧</strong>：视频经理解模型打标、切片、向量化后进入检索服务，对外暴露统一的召回接口（文本 query + 过滤条件 → 候选列表）。<strong>文案与编排侧</strong>：先用模型把 brief 拆成多段「口播 + 结构化特征」（场景、动作、镜头、标签、期望时长等），再把每一段转写为适合向量检索的自然语言句；召回得到若干候选后，用向量相似度、标签重合、时长匹配等加权选出唯一 clip，并记录可解释的中间分。最后由<strong>协议层</strong>把每镜的起止时间、视频源、字幕文案写成编辑器或渲染 worker 认识的 JSON，使「自动成片」在工程上落地为「协议生成」而非「黑盒视频文件」。
+        </p>
+
+        <h2>四、从零到一的实现步骤</h2>
+        <ol>
+          <li>
+            <strong>定义分镜与特征 schema</strong>：约定每条分镜至少包含口播文案、标签集合、期望时长与镜头语义字段，作为后续检索与打分的公共语言。
+          </li>
+          <li>
+            <strong>实现「brief → 分镜表」的固定编排</strong>：用提示词 + 结构化输出（如 JSON schema）约束模型，失败时降级为单镜或占位，避免整段任务崩溃。
+          </li>
+          <li>
+            <strong>实现「分镜 → 检索句」</strong>：将结构化特征与口播融合为单一 query_text，便于向量库只做文本侧 embedding；批量生成所有分镜的 query 后再调检索，便于批处理与缓存。
+          </li>
+          <li>
+            <strong>接入检索服务</strong>：实现 HTTP 客户端，传 query 与硬过滤（品类、时长区间等），拿到 TopK 及元数据；检索服务可先用 mock 排序验证链路，再换真实向量库而不改编排代码。
+          </li>
+          <li>
+            <strong>规则选优与可追溯</strong>：在 TopK 上实现加权打分与 tie-break，输出 clip_id 与各分项得分，便于运营审核与模型迭代对照。
+          </li>
+          <li>
+            <strong>组装双轨时间线协议</strong>：按分镜顺序累加时间轴，生成视频轨片段（源、trim、画布参数）与对齐的字幕/口播轨；协议模块只依赖前几步的结构化结果，不反向依赖 LLM，便于单测与版本管理。
+          </li>
+          <li>
+            <strong>与成片引擎衔接</strong>：由现有非编或云 worker 消费协议；需要 TTS 时在策划或合成前用音频时长反推片段时间，避免口播与画面漂移。
+          </li>
+        </ol>
+
+        <h2>五、小结与边界</h2>
+        <p>
+          这一架构的边界是：<strong>它不替代素材理解与入库流水线</strong>，也不内置最终视频编码；它解决的是「语义到时间线」的可维护桥梁。把检索与规则分开、把协议与 LLM 分开，是为了让自动成片在团队中可分工、可压测、可灰度。实现细节上曾按「编排五步 + 双轨 JSON」的工程形态做过完整 PoC，用于验证接口语义与回归路径。
+        </p>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

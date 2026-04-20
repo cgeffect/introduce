@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>技术文章与行业笔记 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html">← 返回首页</a>
+      <header>
+        <p class="meta">写作与沉淀</p>
+        <h1>技术文章与行业笔记</h1>
+        <p class="meta">工程实践文章，以及短视频与智能剪辑方向的方案与行业成稿。</p>
+      </header>
+
+      <nav class="articles-toc" aria-label="本页分区">
+        <a href="#tech-articles">技术文章</a>
+        <a href="#industry-notes">行业笔记</a>
+      </nav>
+
+      <section class="articles-section" id="tech-articles">
+        <h2>技术文章</h2>
+        <p class="section-lead">音视频与剪辑工程相关的技术文章。</p>
+
+        <article class="article-entry" id="entry-e2e-preview">
+          <h3 class="article-entry__title">基于 WebRTC 实现的端到端渲染预览</h3>
+          <p class="article-entry__summary">
+            对齐 e2e-rendering：同一台 Mac、本机 WebSocket 信令、无 SFU；浏览器标准 WebRTC API + DataChannel 时间线，Mac LiveServer 与 Web 双端协同编辑；附流程图。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__linkrow" href="e2e-preview-system.html">
+              <code class="article-entry__href">articles/e2e-preview-system.html</code>
+              <span class="article-entry__cta">打开</span>
+            </a>
+            <time class="article-entry__time" datetime="2026-04-20">2026-04-20</time>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-cuda-gpu">
+          <h3 class="article-entry__title">Linux 上 CUDA–OpenGL 全链路 GPU 加速</h3>
+          <p class="article-entry__summary">
+            独立成篇：NVDEC 与 NVENC、两段 CUDA 中转、各实验模块的处理步骤与性能对比表；附总览流程图与官方 Codec/CUDA 文档链接。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__linkrow" href="linux-cuda-gpu-pipeline.html">
+              <code class="article-entry__href">articles/linux-cuda-gpu-pipeline.html</code>
+              <span class="article-entry__cta">打开</span>
+            </a>
+            <time class="article-entry__time" datetime="2026-04-20">2026-04-20</time>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-cloud">
+          <h3 class="article-entry__title">云剪辑任务调度与 RocketMQ 编排</h3>
+          <p class="article-entry__summary">
+            云剪辑任务队列、编排与 RocketMQ 等消息中间件的协作方式。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__linkrow" href="cloud-pipeline.html">
+              <code class="article-entry__href">articles/cloud-pipeline.html</code>
+              <span class="article-entry__cta">打开</span>
+            </a>
+            <time class="article-entry__time" datetime="2026-03-15">2026-03-15</time>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-ai-timeline">
+          <h3 class="article-entry__title">AI Timeline 自动成片链路拆解</h3>
+          <p class="article-entry__summary">
+            自动成片的产品与技术背景；为何拆分检索、规则与协议；语义到双轨时间线的原理与从零到一实现顺序。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__linkrow" href="ai-timeline.html">
+              <code class="article-entry__href">articles/ai-timeline.html</code>
+              <span class="article-entry__cta">打开</span>
+            </a>
+            <time class="article-entry__time" datetime="2026-04-20">2026-04-20</time>
+          </div>
+        </article>
+      </section>
+
+      <section class="articles-section stack" id="industry-notes">
+        <h2>行业笔记</h2>
+        <p class="section-lead">短视频与智能剪辑方向的方案与行业观察。</p>
+
+        <article class="article-entry" id="entry-industry-insight">
+          <h3 class="article-entry__title">AI 智能剪辑行业洞察</h3>
+          <p class="article-entry__summary">
+            从「配音视频 / 营销短视频」早入局视角复盘 2022 年以来技术、资本与需求变化；讨论技术与场景脱节、素材复用与合规、轻量化与专业化两极、「全品类通吃」与「垂直标准化」的取舍，并结合
+            ToB SaaS 交付经验延伸到 2026 年合规与多元计费形态。
+          </p>
+          <div class="article-entry__links">
+            <a
+              class="article-entry__linkrow"
+              href="md-view.html?path=%2E%2E%2Fresource%2Fpro8%2FAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E8%A1%8C%E4%B8%9A%E6%B4%9E%E5%AF%9F%E6%8A%A5%E5%91%8A.md&amp;title=%E4%B8%80%E3%80%81AI%20%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E8%A1%8C%E4%B8%9A%E6%B4%9E%E5%AF%9F"
+            >
+              <code class="article-entry__href">resource/pro8/AI智能剪辑行业洞察报告.md</code>
+              <span class="article-entry__cta">排版阅读</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-industry-beauty">
+          <h3 class="article-entry__title">美妆行业 AI 智能剪辑全流程方案</h3>
+          <p class="article-entry__summary">
+            围绕口播语义与画面精准匹配，覆盖文案结构化、语义标签、Whisper 与轻量分类、素材校验、FFmpeg scene 分镜、自动合成与二次编辑闭环；面向月预算约
+            1–2 万的中小 B 美妆客户，对齐竖屏投放与抖音 / 视频号习惯。
+          </p>
+          <div class="article-entry__links">
+            <a
+              class="article-entry__linkrow"
+              href="md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88.md&amp;title=%E4%BA%8C%E3%80%81%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9A%20AI%20%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E6%96%B9%E6%A1%88"
+            >
+              <code class="article-entry__href">resource/pro8/美妆行业AI智能剪辑全流程可行性方案.md</code>
+              <span class="article-entry__cta">排版阅读</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-industry-live">
+          <h3 class="article-entry__title">大模型驱动直播切片</h3>
+          <p class="article-entry__summary">
+            高光筛选、配音与配文字、固定 timeline / JSON 与云剪辑衔接；含直播预处理、Whisper、转化导向选片、TTS 与任务监控；技术选型示例含
+            Qwen / Llama、VITS / 商业 TTS 及弹幕与音频特征辅助，服务电商与美妆直播切片量产。
+          </p>
+          <div class="article-entry__links">
+            <a
+              class="article-entry__linkrow"
+              href="md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%9B%B4%E6%92%AD%E5%88%87%E7%89%87.md&amp;title=%E4%B8%89%E3%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%A9%B1%E5%8A%A8%E7%9B%B4%E6%92%AD%E5%88%87%E7%89%87"
+            >
+              <code class="article-entry__href">resource/pro8/直播切片.md</code>
+              <span class="article-entry__cta">排版阅读</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-industry-voice">
+          <h3 class="article-entry__title">视频原声类剪辑（汽车 vs 无原声营销）</h3>
+          <p class="article-entry__summary">
+            对比原生声 + ASR 与文案 + TTS 两条路径，在统一「开篇—卖点—转化」结构下规范关键词特效与音效卡点，并给出巨量系投放下的数据化表述与文字
+            / 音效规范。
+          </p>
+          <div class="article-entry__links">
+            <a
+              class="article-entry__linkrow"
+              href="md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E8%A7%86%E9%A2%91%E5%8E%9F%E5%A3%B0%E7%B1%BB%E5%89%AA%E8%BE%91.md&amp;title=%E5%9B%9B%E3%80%81%E8%A7%86%E9%A2%91%E5%8E%9F%E5%A3%B0%E7%B1%BB%E5%89%AA%E8%BE%91%EF%BC%88%E6%B1%BD%E8%BD%A6%20vs%20%E6%97%A0%E5%8E%9F%E5%A3%B0%E8%90%A5%E9%94%80%EF%BC%89"
+            >
+              <code class="article-entry__href">resource/pro8/视频原声类剪辑.md</code>
+              <span class="article-entry__cta">排版阅读</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-industry-showcase">
+          <h3 class="article-entry__title">短视频与智能剪辑 · 专题页</h3>
+          <p class="article-entry__summary">
+            按章节整理的专题页面，便于通读与跳转。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__linkrow" href="../showcase/pro8.html">
+              <code class="article-entry__href">showcase/pro8.html</code>
+              <span class="article-entry__cta">打开</span>
+            </a>
+          </div>
+        </article>
+      </section>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="王腾飞 — 专注云剪辑、端云一致预览与 LLM 自动成片的端到端音视频与渲染方向，自荐与项目展示。"
+    />
+    <title>王腾飞 · 个人介绍</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="logo" href="index.html">王腾飞</a>
+        <nav class="nav" aria-label="页面导航">
+          <a href="#projects">项目模块</a>
+          <a href="#tech">技术栈</a>
+          <a href="#experience">经历</a>
+          <a href="articles/index.html">文章</a>
+          <a
+            href="https://github.com/cgeffect"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="top">
+        <p class="hero__eyebrow">云剪辑 · 端云一致 · LLM 成片</p>
+        <h1>你好，我是王腾飞</h1>
+        <p class="hero__role">
+          音视频 / 渲染引擎方向 · 把「要出片」做到「可规模化上线」
+        </p>
+        <p class="hero__summary">
+          我主攻<strong>端到端视频生产</strong>，能把业务侧的脚本与素材，一路收敛成<strong>可渲染时间线</strong>，再经<strong>云剪辑</strong>落成可投放成片。三块能力我最常扛：<strong>Linux 云剪辑与分布式渲染</strong>——多轨合成、转码、任务调度与 GPU 流水线，支撑大批量稳定出片；<strong>端云一致的实时预览</strong>——同一套 C++ 渲染核心落在 macOS / Web（WASM）并与云端对齐，减少「剪完才发现不对」的返工；<strong>LLM 与自动化编排</strong>——文案与分镜、素材与装饰匹配、Timeline 组装与 TTS 对齐，把智能化接到工程闭环里。若你正在找能打通「创意 → 时间线 → 云端成片」的人，往下翻项目与技术栈，底部是工作经历，我们可以很快对齐是否合拍。
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#projects">查看项目模块</a>
+          <a class="btn" href="resume.html">我的简历</a>
+          <a class="btn" href="articles/index.html">阅读技术文章</a>
+          <a
+            class="btn"
+            href="https://github.com/cgeffect"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub：cgeffect</a
+          >
+        </div>
+      </section>
+
+      <section class="section" id="projects">
+        <div class="section__head">
+          <h2>项目模块</h2>
+          <p>点击卡片进入项目介绍与演示；代码仓库入口在对应详情页文末。</p>
+        </div>
+        <div class="cards cards--projects">
+          <article class="card">
+            <a class="card__hit" href="showcase/pro1.html" aria-label="pro1 端云剪辑与多端预览 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro1.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro1 · 端云剪辑</p>
+                <h3 class="card__media-title">e2e-rendering</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro1</span>
+              <p>
+                桌面非编与浏览器监看、Web 侧预览与导出、与云端渲染任务同一条语义链路的实践整理；含多端协同与复杂包装效果的本地演示录像，对应云剪辑与端预览方向交付经验。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro2.html" aria-label="pro2 Linux 云剪辑 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro2.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro2 · PDF + 成片</p>
+                <h3 class="card__media-title">Linux 云剪辑 / 渲染系统</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro2</span>
+              <p>
+                Linux 上多轨道非编与合成、控制台与 OpenAPI 一体的云剪辑「制作中心」；收录系统架构与渲染链路的 PDF 说明，以及电商、本地生活等多行业营销成片 demo。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro3.html" aria-label="pro3 Remotion — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro3.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro3 · Remotion</p>
+                <h3 class="card__media-title">Remotion 渲染</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro3</span>
+              <p>
+                用 React / Remotion 把组件写成时间线：适合模板化营销片、数据驱动片头与 CI 里批量出片；与 Node 渲染进程、合成参数化一套仓库管线对齐。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro4.html" aria-label="pro4 AutoClip — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro5.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro4 · AutoClip</p>
+                <h3 class="card__media-title">AutoClip</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro4</span>
+              <p>
+                把故事线或口播脚本自动展开为可渲染时间线：串联文案分镜、素材候选、字幕与装饰轨，输出给云剪辑或端侧执行，缩短从创意到试片的路径。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro5.html" aria-label="pro5 skia-macos 图文渲染 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro6.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro5 · 图文渲染</p>
+                <h3 class="card__media-title">skia-macos 图文渲染系统</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro5</span>
+              <p>
+                macOS 上基于 Skia 的图文渲染引擎：模板化海报、主图与长图批量出图，字体色板与安全区可固化，适合与电商 SKU、活动运营数据中台对接出图。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro6.html" aria-label="pro6 WebRTC 通话 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro7.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro6 · WebRTC</p>
+                <h3 class="card__media-title">webrtc 的通话系统</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro6</span>
+              <p>
+                点对点实时音视频：采集与编解码、ICE 与穿透、呼叫状态机与弱网降级；可嵌入客服视频、远程协助、小班课等需要低延迟互通的业务壳里。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="showcase/pro7.html" aria-label="pro7 移动端专业视频剪辑 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro3.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro7 · iOS 剪辑</p>
+                <h3 class="card__media-title">移动端专业视频剪辑</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro7</span>
+              <p>
+                iOS 端专业剪辑与包装：画幅与背景、AI 人像分割与换背景、滤镜与粒子特效、美颜美体、入场出场动画与裁剪旋转，面向竖屏营销与口播成片在手机上闭环完成。
+              </p>
+            </div>
+          </article>
+          <article class="card">
+            <a class="card__hit" href="articles/index.html#industry-notes" aria-label="营销视频剪辑行业现状分析 — 查看介绍"></a>
+            <div class="card__media">
+              <img class="card__media-art" src="assets/cards/pro8.svg" alt="" width="800" height="450" decoding="async" />
+              <div class="card__media-overlay">
+                <p class="card__media-eyebrow">pro8 · 行业与方案</p>
+                <h3 class="card__media-title">营销视频剪辑行业现状分析</h3>
+              </div>
+            </div>
+            <div class="card__body">
+              <span class="card__tag">pro8</span>
+              <p>
+                配音短视频与智能剪辑赛道的趋势复盘、美妆与直播切片等垂直方案、以及原声类巨量投放素材规范；成稿在技术文章与专题页，便于路演与方案对齐。
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="tech">
+        <div class="section__head">
+          <h2>技术栈</h2>
+        </div>
+        <div class="tech-grid tech-grid--wide">
+          <div class="tech-block">
+            <h3>语言与脚本</h3>
+            <p>
+              <strong>Swift、Objective-C</strong>（iOS/macOS 主力）；<strong>C++</strong>（渲染与 FFmpeg 侧核心、WASM
+              编译）；<strong>Python</strong>（预处理、算法脚本、自动化）；<strong>JavaScript / TypeScript</strong>（Electron、Remotion、工具链）；Shell、CMake
+              等工程配套。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>客户端与 UI</h3>
+            <p>
+              UIKit、SnapKit；<strong>Metal</strong> 多轨合图与性能调优；<strong>Electron</strong> 多进程架构；与设计协作（如 Figma → 代码）下的界面落地经验。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>音视频与媒体管线</h3>
+            <p>
+              FFmpeg（解码、转码、多轨合成、封装）；x264/x265；软硬编解码与 <strong>NVDEC / NVENC</strong>；时间线协议、流式加载（如 AVIO
+              分块缓存）；采集、剪辑、导出全链路。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>渲染与图形</h3>
+            <p>
+              OpenGL、<strong>SwiftShader</strong> CPU 渲染路径；<strong>CUDA–OpenGL</strong> 互操作与显存侧优化；Metal；Web 侧
+              WASM + OpenGL ES；MetalPetal、Skia 等图像/视频特效与图文场景。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>平台与运行时</h3>
+            <p>iOS、macOS、Linux 服务器；跨平台同构渲染核心的维护与裁剪；云端 GPU 作业与本地预览一致性保障。</p>
+          </div>
+          <div class="tech-block">
+            <h3>网络、消息与实时</h3>
+            <p>
+              <strong>WebRTC</strong>（自定义采集、推流监看）；<strong>ZeroMQ</strong>（Electron IPC）；<strong>MQTT</strong>（如
+              CocoaMQTT 直播消息）；<strong>RocketMQ</strong> 任务调度与 Pipeline 编排。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>AI 与智能化链路</h3>
+            <p>
+              LLM Prompt、分镜与语义标签；<strong>Pydub、MoviePy、OpenCV、librosa</strong> 等预处理；ASR / TTS 对齐；规则引擎与素材排序；<strong>LangChain</strong>、向量检索
+              <strong>Faiss / Chroma</strong>、Function Call 等按需接入。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>工程与质量</h3>
+            <p>
+              自动化<strong>视频质量回归</strong>、核心逻辑高覆盖率测试；Git 协作；复杂需求下的 POC、协议设计与文档沉淀；ToB 交付节奏与多业务线优先级管理。
+            </p>
+          </div>
+          <div class="tech-block">
+            <h3>流媒体学习实践</h3>
+            <p>RTMP/RTP、H.264/AAC 封包与解包；ZLMediaKit 搭建与基础链路验证。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="experience">
+        <div class="section__head">
+          <h2>工作经历</h2>
+          <p>按时间倒序；细节以简历为准，此处为结构化展示。</p>
+        </div>
+        <div class="timeline">
+          <article class="timeline__item">
+            <p class="timeline__meta">2025.10 — 2026.3 · 上海帷秀科技有限公司</p>
+            <h3>音视频工程师</h3>
+            <p>
+              Poppo Live 出海直播：短视频生产、拍摄剪辑、一键成片；模板视频（服务端渲染 +
+              端侧接入）、MQTT 消息、Metal 多轨合图等。
+            </p>
+            <ul>
+              <li>模板视频生产能力落地，降低端侧复杂度</li>
+              <li>拍摄 / 剪辑 / 导出链路，完善内容生产闭环</li>
+              <li>Metal 多轨道合图与多播放器性能优化</li>
+            </ul>
+          </article>
+
+          <article class="timeline__item">
+            <p class="timeline__meta">2022.1 — 2025.8 · 杭州奥创光年</p>
+            <h3>渲染引擎开发工程师</h3>
+            <p>
+              智能视频剪辑 SaaS：从 0 到 1 分布式音视频云服务、云剪辑渲染、端侧 Timeline
+              预览与 WASM、AI 自动成片等子系统。
+            </p>
+            <ul>
+              <li>云渲染：FFmpeg、SwiftShader、RocketMQ、GPU 硬编解码与 CUDA–OpenGL 互操作</li>
+              <li>端预览：C++/OpenGL/FFmpeg → WASM；macOS Timeline；Electron + ZeroMQ IPC</li>
+              <li>质量保障：自动化视频回归，核心逻辑高覆盖率</li>
+            </ul>
+          </article>
+
+          <article class="timeline__item">
+            <p class="timeline__meta">2020.6 — 2021.8 · 杭州格像科技</p>
+            <h3>音视频开发</h3>
+            <p>移动短视频 SDK：采集、编辑、播放、OpenGL/Metal 渲染与导出优化。</p>
+          </article>
+
+          <article class="timeline__item">
+            <p class="timeline__meta">2015 — 2020 · iOS 开发</p>
+            <h3>连信、创乔、多麦</h3>
+            <p>比优心理、轻松妈妈、海蜜全球购等产品线的 iOS 业务开发与维护。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>王腾飞 · 个人介绍页 · <span id="year"></span> · 静态部署友好</p>
+      <p>
+        GitHub：
+        <a href="https://github.com/cgeffect" target="_blank" rel="noopener noreferrer"
+          >https://github.com/cgeffect</a
+        >
+      </p>
+      <p>联系方式见简历原文（本站不重复展示电话，避免爬虫采集）。</p>
+    </footer>
+
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

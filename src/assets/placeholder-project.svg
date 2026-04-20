@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#eef2f7"/>
+      <stop offset="100%" style="stop-color:#f8fafc"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#g)"/>
+  <circle cx="400" cy="200" r="48" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.45"/>
+  <text x="400" y="290" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="18">项目示意图 · 可替换为实际截图</text>
+</svg>

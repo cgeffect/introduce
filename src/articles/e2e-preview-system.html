@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>基于 WebRTC 实现的端到端渲染预览 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>基于 WebRTC 实现的端到端渲染预览</h1>
+        <p class="meta">本机双端 · 无 SFU · 浏览器标准 WebRTC API + macOS LiveServer</p>
+      </header>
+      <div class="prose">
+        <h2>一、技术背景</h2>
+        <p>
+          剪辑类产品往往天然分裂成几块：专业操作在桌面或非编里完成，对外演示却常靠「导出一版 MP4」传来传去；若浏览器里要实时看到与渲染管线一致的预览，要么把半条解码合成链路搬进 WASM，要么把<strong>已编码的实时画面</strong>用标准流媒体通道送给浏览器。后者正是 WebRTC 的用武之地：<strong>重解码、时间线合成、色彩与编码仍在「算力那一端」</strong>，浏览器侧用平台自带的 WebRTC API 收流即可。
+        </p>
+
+        <h2>二、为什么要这样做</h2>
+        <p>
+          用 WebRTC 做预览的核心收益是<strong>外端（浏览器）不必实现一套复杂播放器与解码栈</strong>：音画同步、缓冲、码率与 RTP 打包主要由对端（本机进程或机房 worker）与 WebRTC 栈完成；编辑侧只要维护<strong>同一份时间线协议</strong>，并把变更可靠地送到渲染侧。先在同一台电脑上跑通「协议 → 渲染 → 推流 → 浏览器收流」，再扩展到远端与多租户，风险更可控。
+        </p>
+
+        <h2>三、原理与架构（高层）</h2>
+        <p>
+          下面以开源参考工程 <strong>e2e-rendering</strong>（AIClip / ChatClip 路线）中的<strong>本机实验形态</strong>为主：所有进程跑在<strong>同一台 Mac</strong>上，<strong>不需要部署 SFU、MCU 等转发媒体服务器</strong>——信令走<strong>本机 WebSocket</strong>（例如绑定 <code style="font-family: var(--mono)">127.0.0.1</code> 的固定端口，默认常见为 19878），媒体面是<strong>本机回环</strong>上的 WebRTC（SDP/ICE 仍在「本机对本机」完成建链）。
+        </p>
+        <p>
+          <strong>浏览器端</strong>使用 <strong>Web 平台自带的官方 API</strong>：<code style="font-family: var(--mono)">RTCPeerConnection</code>、<code style="font-family: var(--mono)">RTCDataChannel</code> 等（见仓库中 <code style="font-family: var(--mono)">web/studio_app.js</code> 一类实现）；页面需通过 <strong>localhost 或 HTTPS</strong> 提供，以满足 WebRTC 的 secure context，不宜用 <code style="font-family: var(--mono)">file://</code> 直接打开。
+        </p>
+        <p>
+          <strong>macOS 端</strong>是独立可执行体 <strong>LiveServer</strong>（renderer 构建产物）：内部用 <strong>WebRTC.xcframework</strong>（与 Chromium 同源的 Google WebRTC 在 Apple 平台上的绑定）处理 PeerConnection、与 ObjC++ 桥接层对接；底层仍是 C++ 的 <strong>OpenGL / Skia / FFmpeg</strong> 等按 <strong>JSON 时间线协议</strong>解码、合成并编码，再把音视频轨以推流形式送回浏览器。
+        </p>
+        <p>
+          <strong>双端协同编辑</strong>：Web 上的 Studio 负责<strong>时间轴、图层与协议对象的编辑</strong>；协议增量经 <strong>RTCDataChannel</strong> 以 JSON 下发到 LiveServer，渲染树根节点按协议更新帧；同时<strong>Mac 进程与浏览器两端都在参与同一条时间线的迭代</strong>——一侧改协议、一侧出画面，无需把整条非编逻辑搬进浏览器。
+        </p>
+
+        <figure class="diagram-block" aria-label="本机双端 WebRTC">
+          <div class="mermaid">
+flowchart TB
+  subgraph oneMac["同一台 Mac 无 SFU"]
+    subgraph browser["浏览器"]
+      ui["Studio\n时间轴与图层编辑"]
+      api["Web 标准 API\nRTCPeerConnection\nRTCDataChannel"]
+      vid["video 收预览流"]
+    end
+    ws["本机 WebSocket 信令\nSDP ICE JSON"]
+    subgraph live["LiveServer 本机进程"]
+      xc["WebRTC.xcframework"]
+      pipe["解码 合成 编码"]
+    end
+  end
+  ui --> api
+  api <-->|SDP ICE| ws
+  xc <-->|SDP ICE| ws
+  api <-->|DataChannel 时间线 JSON| xc
+  xc --> pipe
+  pipe -->|媒体帧进入 WebRTC| xc
+  xc <-->|SRTP 本机回环| api --> vid
+          </div>
+          <figcaption>图 1：e2e-rendering 式本机形态——信令仅本机 WebSocket，无 SFU；浏览器用平台 WebRTC API；Mac 侧原生栈 + 渲染管线；DataChannel 承载协议，媒体轨本机回环预览。</figcaption>
+        </figure>
+
+        <h3>3.1 WebRTC 在本机形态下的分工</h3>
+        <p>
+          与「必须把解码器写进浏览器」相比，本方案里<strong>多种多样预览画面都来自同一套渲染管线</strong>，只是<strong>观看入口在 Web</strong>：多路解码、时间线合成、再编码进 WebRTC，都在 LiveServer 内完成；浏览器主要负责<strong>建链、收流、以及经 DataChannel 写协议</strong>，因此外端不需要自研 MSE 长缓冲队列或 WASM 整包解码器。
+        </p>
+        <p>
+          扩展到<strong>跨机器、跨机房</strong>时，再在信令与媒体路径上引入 TURN、或 SFU/MCU 等多方转发即可；本机阶段刻意省略 SFU，是为了先把<strong>协议往返、渲染节拍与 WebRTC 推流</strong>调稳。
+        </p>
+
+        <figure class="diagram-block" aria-label="信令与 DataChannel 与媒体">
+          <div class="mermaid">
+flowchart LR
+  subgraph br["浏览器"]
+    sigc["信令客户端\n连 ws 127.0.0.1"]
+    dc["RTCDataChannel\n下发协议 JSON"]
+    pc["RTCPeerConnection"]
+  end
+  subgraph lv["LiveServer"]
+    sigs["WebSocket 信令服务"]
+    dcs["DataChannel 对端"]
+    enc["编码后 RTP"]
+  end
+  sigc <-->|Offer Answer ICE| sigs
+  pc <-->|与信令协同| sigc
+  dc <-->|json| dcs
+  enc <-->|SRTP| pc
+          </div>
+          <figcaption>图 2：信令面（WebSocket 文本帧交换 SDP/ICE）与媒体面（SRTP）、以及独立的数据面（DataChannel 时间线）在同一会话内并存。</figcaption>
+        </figure>
+
+        <h3>3.2 Web 预览路线二：WASM（对照）</h3>
+        <p>
+          将 C++/FFmpeg/OpenGL 子集编译为 <strong>WASM</strong> 时，浏览器<strong>本地</strong>完成解码与部分合成，便于 scrub 与弱网离线；但需要处理线程模型、内存上限与包体。<strong>与当前 e2e-rendering 主路径互补</strong>：主路径是「Mac 渲染 + WebRTC 预览」，WASM 可作为另一实验分支或特定交互的补充。
+        </p>
+
+        <figure class="diagram-block" aria-label="WASM 对照">
+          <div class="mermaid">
+flowchart TB
+  subgraph browserwasm["浏览器"]
+    wasm["WASM 解码与合成子集"]
+    gl["WebGL Canvas"]
+    logic["缓冲与内存边界\n需自研"]
+  end
+  assets["媒资"] --> wasm --> gl
+  wasm --- logic
+          </div>
+          <figcaption>图 3：WASM 路线——能力形态不同，客户端承担更重播放器逻辑。</figcaption>
+        </figure>
+
+        <p>
+          <strong>选型小结：</strong>本仓库主打的「同机 + WebRTC」优先换<strong>预览实时性与工程边界清晰</strong>；要强 scrub 或离线再评估 WASM。
+        </p>
+
+        <h2>四、从零到一的实现步骤（与本仓库对齐）</h2>
+        <ol>
+          <li>
+            <strong>冻结 JSON 时间线协议</strong>：与渲染树根节点（如 <code style="font-family: var(--mono)">RootNode</code>）消费字段一致，区分「仅预览」与「导出 MP4」等控制消息。
+          </li>
+          <li>
+            <strong>在 macOS 上构建 LiveServer</strong>：接入 WebRTC.xcframework，拉起本机 WebSocket 信令端口；确认与可执行文件同目录的依赖（如 README 所述 dylib 等）。
+          </li>
+          <li>
+            <strong>用本地 HTTP(S) 或 localhost 打开 Web Studio</strong>：在浏览器里用标准 API 建连；验证 Offer/Answer、ICE 与 DataChannel 的 open 顺序。
+          </li>
+          <li>
+            <strong>打通 DataChannel → 协议 → 一帧渲染 → 编码 → 上行</strong>：处理无物理麦克风时的音频泵送（如 Fake ADM 等方案，见仓库内文档），避免音画不同步。
+          </li>
+          <li>
+            <strong>双端编辑联调</strong>：Web 改时间轴/图层即推 JSON；LiveServer 侧日志与丢帧策略可观测；必要时加 Electron 壳统一 spawn LiveServer 与内置页（同一 secure context）。
+          </li>
+          <li>
+            <strong>再考虑跨机</strong>：引入 TURN/SFU、鉴权与多路会话，把本机已验证的协议与媒体节拍搬到机房。
+          </li>
+        </ol>
+
+        <h2>五、小结与边界</h2>
+        <p>
+          本机形态的价值是<strong>用最小拓扑验证端到端</strong>：无 SFU、素材与算力不离开本机时，最容易暴露协议往返与渲染节拍问题。公开实现与目录说明见
+          <a href="https://github.com/cgeffect/e2e-rendering" target="_blank" rel="noopener noreferrer">e2e-rendering</a>；浏览器侧 API 总览见
+          <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/WebRTC_API" target="_blank" rel="noopener noreferrer">MDN — WebRTC API</a>、
+          <a href="https://webrtc.org/getting-started/overview" target="_blank" rel="noopener noreferrer">webrtc.org — Getting started</a>。
+        </p>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "neutral",
+        securityLevel: "loose",
+        flowchart: { htmlLabels: true, curve: "basis" },
+      });
+    </script>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

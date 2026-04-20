@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro8 · 短视频剪辑行业与分析 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../articles/index.html">← 返回技术文章与笔记</a>
+      <header>
+        <p class="meta">pro8 · 行业洞察与落地方案（排版专题）</p>
+        <h1>短视频剪辑行业现状分析</h1>
+        <p class="meta">
+          与 <a href="../articles/index.html#industry-notes">技术文章页 · 行业笔记</a> 内容同源；本页侧重分节排版与快速导航。完整论述以
+          <code style="font-family: var(--mono)">resource/pro8/</code> 下 Markdown 为准。
+        </p>
+      </header>
+
+      <ul class="subnav">
+        <li><a href="#insight">行业洞察</a></li>
+        <li><a href="#beauty">美妆方案</a></li>
+        <li><a href="#live">直播切片</a></li>
+        <li><a href="#voice">视频原声类</a></li>
+        <li><a href="#sources">源文件</a></li>
+      </ul>
+
+      <div class="prose" id="insight">
+        <h2>一、AI 智能剪辑行业洞察</h2>
+        <p>
+          文档从「配音视频 / 营销短视频」早入局视角复盘 2022 年以来技术、资本与需求变化，指出行业正从「自动化替代人工」走向「生成式 + 人机协同 + 垂直场景」。
+        </p>
+        <p>
+          核心观察包括：技术与场景脱节、素材复用与合规成本、轻量化与专业性两极分化、以及「全品类通吃」相对「垂直标准化」的取舍。报告结合
+          ToB SaaS 的交付经验，讨论标准化流程与可规模化变现的前提，并延伸到 2026 年合规（版权、AI 标识）与多元计费形态。
+        </p>
+      </div>
+
+      <div class="prose stack" id="beauty">
+        <h2>二、美妆行业 AI 智能剪辑全流程方案</h2>
+        <p>
+          针对「口播语义与画面精准匹配」痛点，方案给出从文案结构化输入、语义标签体系（产品核心 / 面部关联 / 使用方式 / 效果承诺）、Whisper
+          转写 + 轻量分类模型打标，到素材上传校验、FFmpeg scene 分镜、自动合成与客户预览二次编辑的闭环。
+        </p>
+        <p>
+          目标客群为月预算约 1–2 万的中小 B 端美妆客户，强调竖屏投放、3 秒抓眼与画质无损，与抖音 / 视频号投放习惯对齐。
+        </p>
+      </div>
+
+      <div class="prose stack" id="live">
+        <h2>三、大模型驱动直播切片</h2>
+        <p>
+          链路强调「高光筛选 → 配音 / 配文字 → 固定 timeline 或 JSON → 云剪辑」：直播录屏经 FFmpeg 统一格式、剔除黑屏与无效段；Whisper
+          转写后由大模型按转化导向 Prompt 筛选福利钩子、卖点演示与下单引导类高光；再生成配文字与 TTS，组装为不可变协议提交云剪辑服务并监控任务状态。
+        </p>
+        <p>
+          技术选型示例包括 Qwen / Llama 量化部署或云端 API、VITS / 商业 TTS，以及弹幕与音频特征辅助选片，整体服务于电商 / 美妆直播切片量产。
+        </p>
+      </div>
+
+      <div class="prose stack" id="voice">
+        <h2>四、视频原声类剪辑（汽车 vs 无原声营销）</h2>
+        <p>
+          文档对比两类形态：汽车类依赖原生声 + ASR 文案与画面对齐；无原声类（如支付宝场景）由文案驱动 + TTS，再统一应用关键词特效与音效卡点。二者在「场景开篇 → 卖点递进 → 价值强化 → 转化收尾」结构上一致，并给出巨量系投放下的数据化表述与文字 / 音效规范（对比度、描边、音效种类上限等）。
+        </p>
+      </div>
+
+      <div class="prose stack" id="sources">
+        <h2>五、成稿阅读（排版 Markdown）</h2>
+        <p>以下链接在站内打开排版阅读页（非纯文本 <code style="font-family: var(--mono)">.md</code> 源码视图）。本地编辑仍以仓库内 <code style="font-family: var(--mono)">resource/pro8/*.md</code> 为准。</p>
+        <ul>
+          <li>
+            <a
+              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2FAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E8%A1%8C%E4%B8%9A%E6%B4%9E%E5%AF%9F%E6%8A%A5%E5%91%8A.md&amp;title=AI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E8%A1%8C%E4%B8%9A%E6%B4%9E%E5%AF%9F%E6%8A%A5%E5%91%8A"
+              >AI智能剪辑行业洞察报告.md</a
+            >
+          </li>
+          <li>
+            <a
+              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88.md&amp;title=%E7%BE%8E%E5%A6%86%E8%A1%8C%E4%B8%9AAI%E6%99%BA%E8%83%BD%E5%89%AA%E8%BE%91%E5%85%A8%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A1%8C%E6%80%A7%E6%96%B9%E6%A1%88"
+              >美妆行业AI智能剪辑全流程可行性方案.md</a
+            >
+          </li>
+          <li>
+            <a href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E7%9B%B4%E6%92%AD%E5%88%87%E7%89%87.md&amp;title=%E7%9B%B4%E6%92%AD%E5%88%87%E7%89%87">直播切片.md</a>
+          </li>
+          <li>
+            <a
+              href="../articles/md-view.html?path=%2E%2E%2Fresource%2Fpro8%2F%E8%A7%86%E9%A2%91%E5%8E%9F%E5%A3%B0%E7%B1%BB%E5%89%AA%E8%BE%91.md&amp;title=%E8%A7%86%E9%A2%91%E5%8E%9F%E5%A3%B0%E7%B1%BB%E5%89%AA%E8%BE%91"
+              >视频原声类剪辑.md</a
+            >
+          </li>
+        </ul>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro7 · 专业视频编辑应用 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro7 · iOS · 剪辑与包装</p>
+        <h1>专业视频编辑应用</h1>
+        <p class="meta">参考实现基于公开分支 1.1.1，侧重画布、AI 人像、特效与滤镜等移动端剪辑能力展示。</p>
+      </header>
+
+      <div class="prose">
+        <h2>一、项目介绍</h2>
+        <p>
+          这是一款面向 iOS 的专业向视频编辑应用：在手机上完成多轨道思路下的包装与出片，覆盖画布比例与背景、AI
+          人像分割与换背景、特效与粒子、滤镜风格、美颜美体、入场出场与转场动画，以及裁剪与旋转等常见剪辑动作，适合营销短视频、口播包装与轻量创作流程。
+        </p>
+        <p>
+          产品形态上强调「模块清晰、预览跟手」：各能力分区明确，关键步骤可实时预览，减少反复导出试错的成本。
+        </p>
+      </div>
+
+      <div class="prose stack">
+        <h2>二、效果与 Demo 演示</h2>
+        <p class="resource-notice resource-notice--github" role="note">
+          <strong>资源说明：</strong>下列截图与 GIF 与仓库 README 中的功能展示一致，文件托管在
+          <strong>GitHub</strong>（<code style="font-family: var(--mono)">raw.githubusercontent.com</code>）。若图片长时间空白，请检查网络能否访问
+          GitHub，必要时需<strong>科学上网</strong>；GIF 体积较大，首次加载可能较慢。每个卡片内为<strong>该预览所展示的具体能力</strong>说明。
+        </p>
+      </div>
+
+      <div class="demo-cards-grid" aria-label="Demo 预览卡片">
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E5%9F%BA%E7%A1%80.PNG"
+              alt="基础剪辑与时间线界面"
+              width="800"
+              height="1422"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">基础功能</h3>
+            <ul>
+              <li>多轨时间线浏览与缩放，片段剪切、拼接与排序</li>
+              <li>素材导入、拖拽入轨，音轨与画轨对齐</li>
+              <li>基础转场预览，导出前成片预览入口</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E7%94%BB%E5%B8%83.gif"
+              alt="画布与画幅"
+              width="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">画布功能</h3>
+            <ul>
+              <li>竖屏 / 横屏等画幅预设，安全区与标题安全线</li>
+              <li>纯色、渐变与图片背景，背景模糊突出主体</li>
+              <li>元素对齐、吸附与分布辅助</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E5%8A%A8%E7%94%BB.gif"
+              alt="动画与动效"
+              width="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">动画效果</h3>
+            <ul>
+              <li>入场 / 出场动画预设，片段间转场动画</li>
+              <li>关键帧控制位移、缩放、透明度</li>
+              <li>动效时长与口播节奏对齐</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E6%BB%A4%E9%95%9C.PNG"
+              alt="滤镜预览"
+              width="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">滤镜效果</h3>
+            <ul>
+              <li>多风格 LUT / 滤镜预设，实时预览</li>
+              <li>强度滑杆与肤色、对比度微调</li>
+              <li>自定义参数保存与复用</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E4%BA%BA%E5%83%8F.gif"
+              alt="人像分割与美化"
+              width="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">人像处理</h3>
+            <ul>
+              <li>人像分割与边缘羽化，一键换背景（色块 / 图片）</li>
+              <li>抠像后主体清晰度与色彩增强</li>
+              <li>与美颜衔接：磨皮、瘦脸等参数调节</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="demo-block">
+          <figure class="demo-block__figure">
+            <img
+              src="https://raw.githubusercontent.com/cgeffect/YouCut/1.1.1/preview/%E7%89%B9%E6%95%88.gif"
+              alt="特效与包装"
+              width="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="prose demo-block__body">
+            <h3 class="demo-block__title">特效处理</h3>
+            <ul>
+              <li>粒子、光效类画面包装</li>
+              <li>贴纸、花字与强调框、箭头等引导元素</li>
+              <li>特效与时间点绑定，控制起止与强度</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="prose stack">
+        <h2>三、技术介绍</h2>
+        <p>
+          客户端采用 <strong>Swift</strong> 与 <strong>UIKit</strong>，布局使用 <strong>SnapKit</strong>；视频与图像管线侧结合
+          <strong>MetalPetal</strong> 等方案做 GPU 侧滤镜与合成；AI 相关能力使用 <strong>Core ML</strong> 与
+          <strong>Vision</strong> 做人像分割、场景理解等；依赖通过 <strong>CocoaPods</strong> 管理。
+        </p>
+        <p>
+          运行与开发环境方面，仓库说明为 iOS 15.0+、Xcode 15.0+、Swift 5.0+；更细的模块划分与接口级说明以仓库内文档为准。
+        </p>
+        <p>
+          更细的模块与接口说明见仓库内 <strong>FEATURES.md</strong>，与上文 Demo 预览及下文八大模块为同一套能力描述。
+        </p>
+      </div>
+
+      <div class="prose stack">
+        <h2>四、八大功能模块</h2>
+        <p>与产品内模块划分一致，下列为各模块对外可见的核心子能力（与仓库 README 列表对齐）。</p>
+
+        <h3>1. 画布 (Canvas)</h3>
+        <ul>
+          <li>多种画布尺寸选择</li>
+          <li>背景模糊效果</li>
+          <li>渐变背景、图片背景</li>
+          <li>对齐方式调整</li>
+        </ul>
+
+        <h3>2. AI 智能 (Brain)</h3>
+        <ul>
+          <li>智能人像分割</li>
+          <li>AI 背景替换</li>
+          <li>智能抠图</li>
+          <li>自动场景识别</li>
+        </ul>
+
+        <h3>3. 特效 (Effect)</h3>
+        <ul>
+          <li>转场特效、视觉特效</li>
+          <li>粒子效果、动态效果</li>
+        </ul>
+
+        <h3>4. 滤镜 (Filter)</h3>
+        <ul>
+          <li>多种滤镜风格、实时预览</li>
+          <li>强度调节、自定义滤镜</li>
+        </ul>
+
+        <h3>5. 美颜 (Beauty)</h3>
+        <ul>
+          <li>肤色调整、磨皮美颜</li>
+          <li>瘦脸瘦身、眼部增强</li>
+        </ul>
+
+        <h3>6. 动画 (Animation)</h3>
+        <ul>
+          <li>入场动画、出场动画、转场动画</li>
+          <li>关键帧动画</li>
+        </ul>
+
+        <h3>7. 裁剪 (Crop)</h3>
+        <ul>
+          <li>自由裁剪、比例裁剪</li>
+          <li>旋转调整、翻转功能</li>
+        </ul>
+
+        <h3>8. 旋转 (Rotate)</h3>
+        <ul>
+          <li>90° / 180° / 270° 旋转</li>
+          <li>自由角度旋转</li>
+        </ul>
+
+        <div class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/cgeffect/YouCut/tree/1.1.1"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 GitHub 仓库</a
+          >
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

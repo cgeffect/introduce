@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro3 · Remotion 渲染 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro3 · React / Remotion 视频化渲染</p>
+        <h1>Remotion 渲染</h1>
+        <p class="meta">React 组件即时间线，可接入 Node 渲染与批量出片管线。</p>
+      </header>
+      <div class="prose">
+        <h2>说明</h2>
+        <p>
+          当前 <code style="font-family: var(--mono)">resource/pro3/</code> 目录为空，可在其中补充工程截图、导出样片或配置说明。站点根下已有一份本地录屏
+          <code style="font-family: var(--mono)">resource/remotion.mov</code>，用于快速展示 Remotion 相关能力。
+        </p>
+        <p>
+          Remotion 将 React 组件时间轴化，适合模板化营销视频、数据驱动片头等场景；具体管线与运行方式以仓库 README 为准。
+        </p>
+      </div>
+      <div class="media-block stack">
+        <div class="media-block__label">resource/remotion.mov</div>
+        <video controls preload="metadata" playsinline>
+          <source src="../resource/remotion.mov" type="video/quicktime" />
+          您的浏览器不支持内嵌播放。
+        </video>
+      </div>
+
+      <div class="prose stack">
+        <h2>技术介绍</h2>
+        <p>
+          Remotion 在 React 中描述帧与合成，由 CLI 或自定义 runner 驱动 FFmpeg 导出；适合把设计稿拆成可参数化组件，再在 CI 或任务队列里按数据批量渲染 MP4。依赖与目录约定以仓库为准。
+        </p>
+        <div class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="https://github.com/cgeffect/remotion-render"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 GitHub 仓库</a
+          >
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

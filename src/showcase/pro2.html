@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pro2 · Linux 云剪辑 / 渲染 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="../index.html#projects">← 返回项目列表</a>
+      <header>
+        <p class="meta">pro2 · Linux 云剪辑与分布式渲染</p>
+        <h1>Linux 云剪辑 / 渲染系统</h1>
+        <p class="meta">音视频多轨道编辑渲染引擎与云剪辑平台能力说明。</p>
+      </header>
+      <div class="prose">
+        <h2>一、系统概述</h2>
+        <h3>1.1 产品定位</h3>
+        <p>
+          视频剪辑（云剪辑）服务是视频的<strong>制作中心</strong>，支持剪切、拼接、混音、字幕、叠加、转场、特效等一系列功能，提供在线可视化的剪辑平台（控制台）及相应的
+          OpenAPI。本文为您介绍云剪辑的系统架构、核心链路说明等。
+        </p>
+        <p>
+          云剪辑是<strong>多轨道的音视频非线性编辑器</strong>（简称非编）。无论音轨还是视轨，在时间线上无需依次线性排列的编辑方式，即非线性编辑；因此下文所介绍的内容，也可准确概括为<strong>《音视频多轨道编辑渲染引擎设计》</strong>。
+        </p>
+        <h3>1.2 功能简介</h3>
+        <p>
+          视频制作在整个视频链路（<strong>采集、制作、播放、媒资管理</strong>）中具有非常重要的地位，将前期的采集拍摄与最终的分发播放连成一体，起着承前启后的作用，云剪辑服务就是其中的<strong>制作中心</strong>。
+        </p>
+        <p>
+          云剪辑是集视频制作、生产、分发等为一体的<strong>在线视频制作平台</strong>，具备工具与服务两方面能力：
+        </p>
+        <p>
+          <strong>工具方面：</strong>云剪辑具备全面视频剪辑能力，支持范围包括多轨道音视频合成、音视频素材的裁剪、切割、拖拽、贴片、文字设置和音频编辑等。
+        </p>
+        <p>
+          <strong>服务方面：</strong>云剪辑平台支持各类业务调用、视频制作与分发以及制作状态查询等服务；合成的新视频将存储到点播媒资库，可快速进行分发播放，无需再下载与上传。
+        </p>
+        <h2>二、完整技术文档（PDF）</h2>
+        <p>
+          架构细节、协议与渲染 / 转码链路等请参阅本地文档
+          <a
+            href="../resource/pro2/云剪辑系统技术介绍.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            ><strong>云剪辑系统技术介绍.pdf</strong></a
+          >
+          （新标签页打开，与 <code style="font-family: var(--mono)">resource/index.json</code> 中 pro2 条目一致）。
+        </p>
+        <p class="doc-actions">
+          <a
+            class="btn btn--primary"
+            href="../resource/pro2/云剪辑系统技术介绍.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >打开 PDF 全文</a
+          >
+        </p>
+        <h2>三、成片案例（video-demo）</h2>
+        <p>以下为目录内示例视频，均为本地静态文件，可直接在浏览器中预览。</p>
+      </div>
+      <div class="resource-video-grid">
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/1688.mp4"></video>
+          <figcaption>1688.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/kimi.mp4"></video>
+          <figcaption>kimi.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/唯品会-乔丹.mp4"></video>
+          <figcaption>唯品会-乔丹.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/唯品会-李宁.mp4"></video>
+          <figcaption>唯品会-李宁.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/小米.mp4"></video>
+          <figcaption>小米.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/米家.mp4"></video>
+          <figcaption>米家.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/美团-歪马送酒.mp4"></video>
+          <figcaption>美团-歪马送酒.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/美团.mp4"></video>
+          <figcaption>美团.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/衣服.mp4"></video>
+          <figcaption>衣服.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/闲鱼.mp4"></video>
+          <figcaption>闲鱼.mp4</figcaption>
+        </figure>
+        <figure>
+          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/阿里巴巴国际站-icbu.mp4"></video>
+          <figcaption>阿里巴巴国际站-icbu.mp4</figcaption>
+        </figure>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

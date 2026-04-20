@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Linux 上 CUDA–OpenGL 全链路 GPU 加速 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>Linux 上 CUDA–OpenGL 全链路 GPU 加速</h1>
+        <p class="meta">NVDEC · CUDA 中转 · OpenGL · NVENC</p>
+      </header>
+      <div class="prose">
+        <h2>一、技术背景</h2>
+        <p>
+          云剪辑与转码里常见路径是：解码 → 在 GPU 上做合成或调色 → 再编码。若中间反复把整帧拉回 CPU，PCIe 与内存带宽很快成为瓶颈。Linux 上配合 NVIDIA GPU 时，解码端可用 NVDEC，编码端可用 NVENC，但<strong>解码器输出的设备缓冲与 OpenGL 纹理、以及 FBO 与编码器输入</strong>并不是同一套 API 能直接对接的类型，中间需要<strong>CUDA 在显存里做「中转」</strong>：把数据接到 OpenGL 能采样的纹理上，再把画完的结果接到编码器能吃的 device 缓冲上。
+        </p>
+
+        <h2>二、为什么要这样做</h2>
+        <p>
+          目标是在<strong>不经过 CPU 主存搬运整帧</strong>的前提下，把解码、光栅化、编码串成一条显存内流水线，从而降低延迟、提高吞吐、减轻 CPU 占用。只有在导出图片、调试读回等场景才额外触达主机内存。
+        </p>
+
+        <h2>三、整体数据通路</h2>
+        <p>
+          可以把整条链路看成两段「CUDA 中转」夹在中间：<strong>硬解码</strong>得到 GPU 侧帧 → 第一段中转把像素接到 <strong>OpenGL 纹理</strong> 上供 GLSL 绘制 → 第二段中转把 <strong>FBO</strong> 里的结果接到 <strong>NVENC</strong> 的输入缓冲。两段中转都用设备侧拷贝（DeviceToDevice）与图形互操作完成，避免整帧在 CPU 上落盘再上传。
+        </p>
+
+        <figure class="diagram-block" aria-label="显存内两段 CUDA 中转">
+          <div class="mermaid">
+flowchart LR
+  DEC["硬解码\nNVDEC / GPU 帧"] --> T1["第一段 CUDA 中转\n纹理互操作 + D2D"]
+  T1 --> GL["OpenGL\n纹理 / FBO / GLSL"]
+  GL --> T2["第二段 CUDA 中转\nFBO→CUDA→编码缓冲"]
+  T2 --> ENC["NVENC\n硬编码"]
+          </div>
+          <figcaption>主路径全部在 GPU：解码缓冲不能直接当纹理用，FBO 也不能直接当编码器输入，因此各需一次 CUDA 侧衔接。</figcaption>
+        </figure>
+
+        <h2>四、CUDA Decoder（解码对比）</h2>
+        <p>
+          这是一个<strong>解码性能对比</strong>实验：在同一套 FFmpeg 流程上，切换<strong>纯 CPU 软件解码</strong>与 <strong>NVDEC 硬件解码</strong>（通过 cuvid 一类硬件解码器并挂上 CUDA 设备上下文），对同一分辨率的 H.264 码流逐帧解码，统计平均耗时与 FPS，从而量化硬件解码带来的吞吐提升。
+        </p>
+        <p><strong>程序内部顺序（与实现一致）：</strong></p>
+        <ol>
+          <li>根据配置选定解码路径：硬件侧选用与 H.264 匹配的 cuvid 解码器，失败则退回软件解码器；软件侧则始终用 CPU 解码器。</li>
+          <li>打开输入封装，解析流信息，定位视频轨，把码流参数写入解码器上下文。</li>
+          <li>若走硬件：创建 CUDA 类型的硬件设备上下文，并挂到解码器上下文上；然后打开解码器。</li>
+          <li>在包循环里不断向解码器投递压缩包、取出解码帧；每取出一帧，在统计里记一次「解码完成」时刻（与后续是否把帧拷到 CPU 做写盘解耦，以便主要反映解码本身）。</li>
+          <li>跑完后汇总总帧数、总耗时、平均每帧、FPS，并可选输出对比报告。</li>
+        </ol>
+        <p><strong>关键点（FFmpeg 硬件解码路径）：</strong>对 H.264 选用 <code style="font-family: var(--mono)">h264_cuvid</code>，并创建 <code style="font-family: var(--mono)">AV_HWDEVICE_TYPE_CUDA</code> 设备上下文挂到解码器上；失败则退回软件解码器。</p>
+        <pre class="article-code"><code>hw_decoder = avcodec_find_decoder_by_name("h264_cuvid");
+if (av_hwdevice_ctx_create(&amp;hw_device_ctx, AV_HWDEVICE_TYPE_CUDA,
+        nullptr, nullptr, 0) == 0) {
+    codec_ctx-&gt;hw_device_ctx = av_buffer_ref(hw_device_ctx);
+}</code></pre>
+        <p><strong>性能对比（720×1280、H.264、约六百帧量级）：</strong></p>
+        <table>
+          <thead>
+            <tr>
+              <th>指标</th>
+              <th>软件解码</th>
+              <th>NVDEC 硬件解码</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>平均每帧耗时</td>
+              <td>约 82 ms</td>
+              <td>约 5 ms</td>
+            </tr>
+            <tr>
+              <td>解码 FPS</td>
+              <td>约 12</td>
+              <td>约 202</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>同一量级素材上，硬件解码相对软件解码约有一个数量级以上的吞吐优势。</p>
+
+        <h2>五、CUDA Encoder（编码对比）</h2>
+        <p>
+          这是一个<strong>编码路径对比</strong>实验：前面统一用硬解码把码流解开，后面分成两条——<strong>零拷贝</strong>路径把 GPU 上的解码帧直接交给 NVENC；<strong>CPU 中转</strong>路径则先把帧拉回主机内存，再走软件编码。通过计时对比两种路径的总编码时间、FPS 与 CPU 占用，说明「少一次整帧 CPU 往返」的收益。
+        </p>
+        <p><strong>程序内部顺序：</strong></p>
+        <ol>
+          <li>用硬解码打开输入，读出视频的宽高、帧率等，填成编码参数（如码率、GOP）。</li>
+          <li>按模式创建编码器：零拷贝分支挂硬件编码器；CPU 拷贝分支挂软件编码器。</li>
+          <li>初始化输出封装与编码器内部状态。</li>
+          <li>循环取帧：零拷贝分支每帧取 GPU 帧并调用「直接送编码器」的接口；CPU 拷贝分支每帧把数据迁到主机再送软件编码器。</li>
+          <li>冲刷编码器、写尾，输出统计与对比结论。</li>
+        </ol>
+        <p><strong>关键点（两条循环分支）：</strong>零拷贝分支反复取 GPU 帧并走「CUDA 帧直送编码器」；CPU 中转分支把每帧落到主机缓冲再走软件编码接口。</p>
+        <pre class="article-code"><code>// 零拷贝：GPU 帧 → NVENC
+while (auto gpu = decoder.get_next_frame_gpu()) {
+    encoder-&gt;encode_gpu_frame(gpu-&gt;frame);
+}
+// 对照：GPU → CPU → x264 等
+while (auto cpu = decoder.get_next_frame_cpu()) {
+    encoder-&gt;encode_cpu_frame(cpu-&gt;data, cpu-&gt;width, cpu-&gt;height,
+                              cpu-&gt;pts, cpu-&gt;linesize);
+}</code></pre>
+        <p><strong>关键点（NVENC 入口）：</strong>硬件编码器侧只接受已是 <code style="font-family: var(--mono)">AV_PIX_FMT_CUDA</code> 的帧时，直接 <code style="font-family: var(--mono)">avcodec_send_frame</code>，避免中间再经主机打包。</p>
+        <pre class="article-code"><code>if (gpu_frame-&gt;format != AV_PIX_FMT_CUDA) return false;
+gpu_frame-&gt;pts = frame_count++;
+avcodec_send_frame(codec_ctx, gpu_frame);</code></pre>
+        <p><strong>性能对比（同批约六百帧）：</strong></p>
+        <table>
+          <thead>
+            <tr>
+              <th>指标</th>
+              <th>经 CPU 中转</th>
+              <th>GPU 直送 NVENC</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>总编码时间</td>
+              <td>约 974 ms</td>
+              <td>约 519 ms</td>
+            </tr>
+            <tr>
+              <td>平均每帧</td>
+              <td>约 1.62 ms</td>
+              <td>约 0.86 ms</td>
+            </tr>
+            <tr>
+              <td>编码 FPS</td>
+              <td>约 616</td>
+              <td>约 1156</td>
+            </tr>
+            <tr>
+              <td>CPU 使用率（测得）</td>
+              <td>约 4.6%</td>
+              <td>约 3.3%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>六、CUDA Host–Device（主机与设备内存）</h2>
+        <p>
+          这个模块演示<strong>Host 与 Device 之间的典型数据路径</strong>：把解码得到的 NV12 帧拷到 GPU，在设备上跑 CUDA 核（例如只调 UV 平面做饱和度），再把结果拷回主机写成 NV12 文件。重点在于分配对齐的 pitch、用核函数按二维线程格覆盖画面，以及控制拷贝方向与同步，与后面「尽量不把整帧拉回 CPU」的全链路目标形成对照——这里故意走一遍完整 Host↔Device，便于单独理解内存模型。
+        </p>
+        <p><strong>程序内部顺序：</strong></p>
+        <ol>
+          <li>解出 NV12 帧到主机缓冲。</li>
+          <li>为 Y、UV 分别在设备上分配内存，并把主机数据拷到设备。</li>
+          <li>启动核函数：亮度可原样拷贝，色度按因子调整饱和度并做饱和裁剪。</li>
+          <li>把设备上的结果拷回主机，按帧写出文件。</li>
+        </ol>
+        <p><strong>关键点（核里分工）：</strong>Y 平面逐像素透传；UV 在半分辨率网格上读交错 U/V，按饱和度因子缩放后裁剪回合法范围。</p>
+        <pre class="article-code"><code>__global__ void enhanceSaturation_kernel(…) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x &gt;= width || y &gt;= height) return;
+    output_y[y * y_pitch + x] = input_y[y * y_pitch + x];
+    // UV：uv_offset = y * uv_pitch + x * 2，对 u,v 乘 saturation_factor 再 clamp
+}</code></pre>
+
+        <h2>七、CUDA NV12 → RGB</h2>
+        <p>
+          这是一个<strong>格式转换</strong>小实验：输入 NV12 平面数据，在 GPU 上按 BT.601 把 Y、U、V 转成每像素 RGBA，必要时再做几何变换（例如旋转）。它不依赖 OpenGL，只依赖 CUDA 核与全局内存布局，适合单独验证色彩矩阵与半分辨率 UV 采样索引是否正确。
+        </p>
+        <p><strong>核函数内逻辑顺序：</strong></p>
+        <ol>
+          <li>按线程坐标映射到输出像素位置。</li>
+          <li>从 Y 平面取亮度；按 4:2:0 规则在 UV 平面取一对色度样本。</li>
+          <li>把 U、V 中心化后带入 BT.601 线性组合得到 R、G、B，裁剪到 0–255。</li>
+          <li>写出 RGBA 四通道（A 可固定为不透明）。</li>
+        </ol>
+        <p><strong>关键点（BT.601 与 UV 下采样）：</strong>每个线程对应输出像素；Y 用全分辨率索引；UV 用 <code style="font-family: var(--mono)">(x/2, y/2)</code> 在交错平面上取一对样本，再线性组合为 R、G、B。</p>
+        <pre class="article-code"><code>unsigned char Y = nv12_y[y * width + x];
+int uv_idx = (y / 2) * width + (x / 2) * 2;
+unsigned char U = nv12_uv[uv_idx];
+unsigned char V = nv12_uv[uv_idx + 1];
+float r = Y + 1.402f * (V - 128.f);
+float g = Y - 0.34414f * (U - 128.f) - 0.71414f * (V - 128.f);
+float b = Y + 1.772f * (U - 128.f);
+// clamp 后写入 rgba[(y*width+x)*4 …]</code></pre>
+
+        <h2>八、CUDA–OpenGL Decoder（解码 + 互操作 + 离屏绘制）</h2>
+        <p>
+          在硬解得到 <strong>GPU 上的 CUDA 像素格式帧</strong>之后，本模块用 <strong>CUDA–OpenGL 互操作</strong>把同一块显存挂到 OpenGL 纹理上，经 GLSL 做例如灰度化，再离屏渲染到 FBO，最后把结果读成位图文件。它回答的是：解码缓冲如何<strong>不经 CPU</strong>接到 GL 管线；其中一步是用设备侧拷贝把解码器缓冲区写入已与纹理绑定的 CUDA 数组，再让 GL 采样。
+        </p>
+        <p><strong>单帧处理顺序（与实现中的阶段划分一致）：</strong></p>
+        <ol>
+          <li>FFmpeg 解出一帧；若为 CUDA 设备帧，在「零拷贝」模式下直接使用该帧，否则先通过硬件帧传输落到 NV12 主机缓冲再走上传路径。</li>
+          <li>把当前帧交给互操作层：映射 GL 纹理为 CUDA 可写资源，用 DeviceToDevice 把 Y、UV 分别写入对应纹理存储。</li>
+          <li>用着色器把 NV12 纹理采样、变换（如转灰度），绘制到离屏 FBO。</li>
+          <li>从 FBO 读回像素（用于落盘 BMP 时必然发生主机读回，与「解码→GL」主链的零拷贝目标分开看待）。</li>
+          <li>计时模块分别累计解码、互操作、渲染、读回各段耗时，便于看瓶颈落在哪一段。</li>
+        </ol>
+        <p><strong>关键点（零拷贝 vs 中转）：</strong>设备帧格式为 <code style="font-family: var(--mono)">AV_PIX_FMT_CUDA</code> 时，零拷贝分支直接把该帧交给互操作；否则先 <code style="font-family: var(--mono)">av_hwframe_transfer_data</code> 得到 NV12 主机帧再走上传。</p>
+        <pre class="article-code"><code>if (frame-&gt;format == AV_PIX_FMT_CUDA &amp;&amp; zero_copy_mode_)
+    output_frame = frame;  // GPU 上直接用
+else if (frame-&gt;format == AV_PIX_FMT_CUDA)
+    av_hwframe_transfer_data(sw_frame, frame, 0);  // → NV12 内存</code></pre>
+        <p><strong>关键点（写入 GL 纹理）：</strong>对映射后的 CUDA 数组做 <code style="font-family: var(--mono)">cudaMemcpy2DToArrayAsync</code>，源为解码器设备指针，拷贝类型为 DeviceToDevice。</p>
+        <pre class="article-code"><code>cudaMemcpy2DToArrayAsync(
+    cuda_array_y, 0, 0,
+    frame-&gt;data[0], frame-&gt;linesize[0],
+    frame-&gt;width, frame-&gt;height,
+    cudaMemcpyDeviceToDevice, cuda_stream_);</code></pre>
+        <p><strong>性能对比（同一短视频上取约五十帧统计）：</strong>零拷贝路径平均约 <strong>4.4 ms/帧、约 228 FPS</strong>；先经 CPU 中转 NV12 再上传的路径约 <strong>5.6 ms/帧、约 178 FPS</strong>，互操作与渲染段在零拷贝下明显更省；读回 BMP 仍占大头时间，说明「链上少回读」与「为了存图必须回读」要分开优化。</p>
+
+        <h2>九、CUDA–OpenGL Encoder（解码 + 绘制 + 再编码）</h2>
+        <p>
+          这是<strong>闭环管线</strong>：硬解 → 互操作里把帧画进 FBO → 把 FBO 附件映射为 CUDA 数组 → 再 DeviceToDevice 拷到为 NVENC 准备的 pitch 缓冲 → 送硬件编码写容器文件。实现里把流程拆成「初始化」「逐帧循环」「收尾」几大块，并在循环内用步骤编号标清顺序，便于对照日志排查。
+        </p>
+        <p><strong>初始化阶段顺序：</strong></p>
+        <ol>
+          <li>打开解码器：硬解 + 零拷贝取帧。</li>
+          <li>按视频分辨率建立 EGL 离屏 OpenGL 上下文与 CUDA 互操作对象。</li>
+          <li>按分辨率、帧率、码率初始化 NVENC 侧封装与编码器。</li>
+          <li>在设备上为编码器输入分配一块 pitch 线性内存。</li>
+        </ol>
+        <p><strong>关键点（初始化三件套）：</strong>先能稳定产出 GPU 帧，再建与分辨率一致的互操作环境，最后打开编码器。</p>
+        <pre class="article-code"><code>decoder-&gt;initialize(input_file, true, true);
+interop-&gt;initialize(width, height);
+encoder-&gt;initialize(width, height, fps, bitrate, output_file);</code></pre>
+        <p><strong>每一帧循环内顺序：</strong></p>
+        <ol>
+          <li>取下一帧解码结果。</li>
+          <li>把帧写入 OpenGL 纹理（互操作 + 设备拷贝）。</li>
+          <li>在 FBO 上做 RGB 渲染。</li>
+          <li>把 FBO 映射为 CUDA 数组，从数组 DeviceToDevice 拷到 NVENC 输入缓冲。</li>
+          <li>调用编码器接口消费该缓冲，然后解除 FBO 映射。</li>
+          <li>记录本帧各阶段耗时并累计进度。</li>
+        </ol>
+        <p><strong>关键点（FBO → NVENC）：</strong>先把 FBO 映射为 <code style="font-family: var(--mono)">cudaArray_t</code>，再 <code style="font-family: var(--mono)">cudaMemcpy2DFromArray</code> 到预先 <code style="font-family: var(--mono)">cudaMallocPitch</code> 的 NVENC 输入缓冲，最后调用「从 CUDA 指针编码」的封装。</p>
+        <pre class="article-code"><code>interop-&gt;mapFBOToCudaArray(&amp;fbo_array);
+cudaMemcpy2DFromArray(nvenc_input_devptr, pitch,
+    fbo_array, 0, 0, width * 4, height, cudaMemcpyDeviceToDevice);
+encoder-&gt;encodeFrameFromCUDA(nvenc_input_devptr, pitch, width, height);
+interop-&gt;unmapFBOCudaArray();</code></pre>
+        <p><strong>收尾顺序：</strong>结束编码、释放设备上为编码预留的线性内存、打印总耗时与平均 FPS。</p>
+
+        <h2>十、小结</h2>
+        <p>
+          硬件解码与硬件编码解决的是「算得快」；<strong>CUDA 与 OpenGL 互操作</strong>解决的是「类型不同、API 不同，但仍要在显存里接起来」。凡是 filter 里隐式 <code style="font-family: var(--mono)">hwdownload</code>、或随意 <code style="font-family: var(--mono)">glReadPixels</code>，都会把链打断回 CPU。产品上要显式区分「必须回读的节点」（缩略图、导出）与「应留在 GPU 的主路径」。
+        </p>
+
+        <h2>十一、参考文档（Codec 与 CUDA）</h2>
+        <ul>
+          <li>
+            <a href="https://docs.nvidia.com/video-technologies/video-codec-sdk/" target="_blank" rel="noopener noreferrer">NVIDIA Video Codec SDK</a>
+          </li>
+          <li>
+            <a href="https://docs.nvidia.com/video-technologies/video-codec-sdk/nvdec-video-decoder-api-prog-guide/" target="_blank" rel="noopener noreferrer">NVDEC 编程指南</a>
+          </li>
+          <li>
+            <a href="https://docs.nvidia.com/video-technologies/video-codec-sdk/nvenc-video-encoder-api-prog-guide/" target="_blank" rel="noopener noreferrer">NVENC 编程指南</a>
+          </li>
+          <li>
+            <a href="https://docs.nvidia.com/video-technologies/video-codec-sdk/ffmpeg-with-nvidia-gpu/" target="_blank" rel="noopener noreferrer">FFmpeg 与 NVIDIA GPU 硬件加速</a>
+          </li>
+          <li>
+            <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#graphics-interoperability" target="_blank" rel="noopener noreferrer">CUDA 与图形互操作</a>
+          </li>
+          <li>
+            <a href="https://trac.ffmpeg.org/wiki/HWAccelIntro" target="_blank" rel="noopener noreferrer">FFmpeg Wiki：硬件加速入门</a>
+          </li>
+        </ul>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "neutral",
+        securityLevel: "loose",
+        flowchart: { htmlLabels: true, curve: "basis" },
+      });
+    </script>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>
