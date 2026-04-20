@@ -28,7 +28,7 @@
           本项目定位为<strong>流程编排框架</strong>：在「脚本 / 故事线 → 结构化分镜与槽位 → 内部 Timeline 表示 → 下游渲染或云剪辑任务」之间，用可扩展的步骤与数据契约把各环节串起来；典型编排上会结合大模型产出与规则引擎约束，再映射为 JSON 化时间线，由 worker 或端侧消费。任务状态、重试与与消息队列的衔接可与云剪辑整体管线对齐（参见 pro2 技术文档中的调度与管线思路）。
         </p>
         <p>
-          <strong>说明：</strong>框架层职责已明确，<strong>各模块的具体实现、接口细节与完整样例</strong>仍在仓库中持续补充；演示成片、架构图或接口说明可置于 <code style="font-family: var(--mono)">resource/pro4/</code>，以实际提交为准。
+          <strong>说明：</strong>下文<a href="#ai-clip-landing"><strong>第三节起</strong></a>为 <strong>Ai_Clip 落地技术方案（按模块）</strong>，按「模块怎么串、输入输出、技术选型、前后端分工」展开；与仓库内 <code style="font-family: var(--mono)">docs/研发落地规格说明.md</code> 对齐（以仓库实际提交为准）。演示成片、补充图仍可置于 <code style="font-family: var(--mono)">resource/pro4/</code>。
         </p>
         <div class="doc-actions">
           <a
@@ -39,6 +39,173 @@
             >打开 GitHub 仓库</a
           >
         </div>
+
+        <h2 id="ai-clip-landing">三、Ai_Clip 落地技术方案（按模块）</h2>
+        <p>
+          目标是把「能落地交付」写清楚：<strong>模块之间怎么串</strong>、每个模块的<strong>输入 / 输出</strong>、<strong>用什么技术</strong>、<strong>哪些交给后端检索</strong>、<strong>哪些由本地规则与编排控制</strong>。
+        </p>
+
+        <h3>3.0 总体数据流（模块之间的关系）</h3>
+        <p>为避免不同环境对流程图渲染不一致，使用文本流程图表达：</p>
+        <pre class="text-flow" style="font-family: var(--mono); font-size: 0.875rem; line-height: 1.5; padding: 1rem; background: var(--surface); border-radius: 8px; overflow-x: auto">0 素材预处理/转码（LD/SD/HD）
+  ├─&gt; 素材理解/打标（外部/异步） ──&gt; 4 召回+规则匹配
+  ├─&gt; 2 分句+特征+标签+描述（query_text）
+  └─&gt; 4 召回+规则匹配（调用后端检索服务）
+
+1 文案故事线生成
+  └─&gt; 2 分句+特征+标签+描述（query_text）
+
+2 分句+特征+标签+描述
+  ├─&gt; 3 TTS
+  ├─&gt; 4 召回+规则匹配
+  └─&gt; 5 装饰元素规划
+
+3 TTS ──&gt; 6 Timeline 组装
+4 召回+规则匹配 ──&gt; 5 装饰元素规划 ──&gt; 6 Timeline 组装 ──&gt; 6.2 渲染输出成片</pre>
+
+        <h3>3.1 模块 0：素材预处理（转码分级：低 / 中 / 高）</h3>
+        <blockquote>
+          <p>
+            该模块通常是「素材平台 / 转码服务」的能力，不属于图文匹配本体，但对整条链路非常关键：它决定了后续各模块使用哪一份码率 / 分辨率的视频资产。
+          </p>
+        </blockquote>
+        <p><strong>目标：</strong>客户上传的原始视频经过转码，生成多档位版本（LD / SD / HD），并输出统一可用的素材索引（URL、码率、分辨率、时长、校验信息）。</p>
+        <p><strong>输入：</strong>客户原始素材（原视频 URL 或上传文件）。</p>
+        <p><strong>输出：</strong></p>
+        <ul>
+          <li><code style="font-family: var(--mono)">asset_id</code> / <code style="font-family: var(--mono)">video_id</code></li>
+          <li>
+            <code style="font-family: var(--mono)">variants</code>（至少三档）：<code style="font-family: var(--mono)">ld_url</code>（低清：预览 / 快速处理）、<code style="font-family: var(--mono)">sd_url</code>（标清：内容理解 / 打标）、<code style="font-family: var(--mono)">hd_url</code>（高清：最终渲染）
+          </li>
+          <li><code style="font-family: var(--mono)">media_meta</code>（width、height、fps、duration、codec、bitrate）</li>
+        </ul>
+        <p><strong>模块关系（关键）：</strong></p>
+        <ul>
+          <li>给阿里云 / 内容理解：优先 <code style="font-family: var(--mono)">sd_url</code>（足够识别且更省钱）。</li>
+          <li>给后端检索入库：通常入库 clip 的结构化特征与描述；metadata 保留 <code style="font-family: var(--mono)">asset_id</code> / <code style="font-family: var(--mono)">video_id</code>。</li>
+          <li>给渲染：必须使用 <code style="font-family: var(--mono)">hd_url</code>。</li>
+        </ul>
+        <p><strong>关键技术：</strong>FFmpeg（H.264 / H.265）、分辨率与码率控制、关键帧间隔；队列 + 幂等（<code style="font-family: var(--mono)">job_id</code>）+ 回调；对象存储（OSS / S3）与可选 CDN；时长一致性、首帧可解码、音轨、MD5 / CRC 等质量校验。</p>
+        <p><strong>落地要点：</strong>理解 / 打标用 SD、成片用 HD；clip 可追溯至 asset + 时间范围与各档位 URL；某档位失败时可回退相邻档位（如 SD 失败用 LD 打标）。</p>
+
+        <h3>3.2 模块 1：提示词工程 + LLM 生产故事线文案</h3>
+        <p><strong>目标：</strong>从 Brief 生成可审核的故事线文案（段落 / 主题 / 风格统一）。</p>
+        <p><strong>输入：</strong>Brief（品牌、品类、平台、时长、禁用词、关键词、风格）。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">storyline_text</code> / <code style="font-family: var(--mono)">StoryboardDraft</code>（可人工审核）→ 进入模块 2。</p>
+        <p><strong>关键技术：</strong>Prompt 工程；RAG 约束文案事实与合规；LLM 可选本地 Ollama（<code style="font-family: var(--mono)">qwen3:8b</code>）或云模型（通义 / DeepSeek 等）；<strong>LangChain LCEL</strong>：Prompt → LLM → Parser。</p>
+        <p><strong>模型选型提要：</strong>结构化输出稳定性、中文广告理解、多次输出一致性、禁用词与必含字段可控性。</p>
+        <p><strong>调用方式：</strong>云模型（如阿里百炼 / Model Studio 通义千问）走 <strong>HTTP API</strong>，官方 SDK 本质是 HTTP 封装；本地 Ollama 则本机起服务、本地 HTTP。</p>
+        <p><strong>阿里付费模型（通义千问）参考：</strong></p>
+        <ul>
+          <li>质量优先：<code style="font-family: var(--mono)">qwen-max</code> / <code style="font-family: var(--mono)">qwen-max-latest</code>（分镜结构化、标签与描述句）。</li>
+          <li>性价比：<code style="font-family: var(--mono)">qwen-plus</code> / <code style="font-family: var(--mono)">qwen-plus-latest</code>。</li>
+          <li>速度 / 成本：<code style="font-family: var(--mono)">qwen-turbo</code> / <code style="font-family: var(--mono)">qwen-turbo-latest</code>（复杂结构化更易抖）。</li>
+        </ul>
+        <p>
+          对接与结构化输出可参考：
+          <a href="https://www.alibabacloud.com/help/zh/model-studio/qwen-api-via-dashscope" target="_blank" rel="noopener noreferrer">DashScope / 百炼 Qwen API（Model Studio）</a>、
+          <a href="https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output" target="_blank" rel="noopener noreferrer">Qwen 结构化输出（JSON Mode / Structured output）</a>。
+        </p>
+        <p><strong>落地要点：</strong>采纳率 / 打回原因 / 二次编辑率；输出宜为可版本化 JSON；RAG 降低幻觉与合规风险；知识库变更采用离线重建索引（如 Chroma persist）、发版后<strong>重启服务</strong>加载，避免不停服热更新的复杂度。</p>
+
+        <h3>3.3 模块 2：分句（分镜 beat）+ 特征 / 标签 + 描述句（query_text）</h3>
+        <p><strong>目标：</strong>把故事线拆成可匹配的 beats，并为每个 beat 产出 tags / feature 与用于向量召回的 <code style="font-family: var(--mono)">query_text</code>。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">storyline_text</code> + 约束（总时长、每屏字数、beat 数量范围）。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">beats[]</code>：含 <code style="font-family: var(--mono)">copy_text</code>、<code style="font-family: var(--mono)">duration_hint_sec</code>、<code style="font-family: var(--mono)">feature.tags</code> / scene / action / shot / mood 等、<code style="font-family: var(--mono)">query_text</code>。</p>
+        <p><strong>模块关系：</strong><code style="font-family: var(--mono)">beats + query_text</code> → 模块 4；<code style="font-family: var(--mono)">copy_text</code> → 模块 3；<code style="font-family: var(--mono)">beats</code> → 模块 5。</p>
+        <p><strong>关键技术：</strong>LLM 结构化输出（Pydantic / JSON Schema）；一致性 Prompt；可选 RAG 对卖点 / 规格 / 禁用词再校验。</p>
+        <p><strong>落地要点：</strong>tags 由 LLM 生成、类目不同则 tag 空间自然变化；<code style="font-family: var(--mono)">query_text</code> 要检索友好；强一致业务可把 RAG 清单写成 <code style="font-family: var(--mono)">must_have</code> / <code style="font-family: var(--mono)">must_not</code>；Chroma 持久化目录作版本化 artifact（manifest：kb_version、embed_model、chunk 参数），部署下载后配置 + 重启切换版本。</p>
+
+        <h3>3.4 模块 3：TTS 转语音（含字级时间轴）</h3>
+        <p><strong>目标：</strong>将每个 beat 的文案变成音频，并取得对齐信息。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">beats[i].copy_text</code> + 音色 / 语速 / 情绪等。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">audio_url</code>、<code style="font-family: var(--mono)">audio_duration_sec</code>、<code style="font-family: var(--mono)">char_timings[]</code>（字 / 词起止，用于字幕逐字高亮与卡点）。</p>
+        <p><strong>模块关系：</strong>输出进入模块 6 的 Timeline（音轨 + 字幕时间对齐）。</p>
+        <p><strong>关键技术：</strong>阿里云 / 火山 / 腾讯 / 自建 TTS 任选；字 / 词级时间戳；若无则 forced-alignment 补齐。</p>
+        <p><strong>落地要点：</strong>字级 timing 是剪映类字幕效果的关键输入；失败可降级句级 timing。</p>
+
+        <h3>3.5 模块 4：后端召回 + 本地规则匹配</h3>
+        <p><strong>分工：</strong></p>
+        <ul>
+          <li><strong>后端检索服务（独立服务）：</strong>高召回（向量 + 过滤 + 标签补漏），返回 TopK；本仓库 PoC 如 <code style="font-family: var(--mono)">/v1/recall</code>。</li>
+          <li><strong>你负责（匹配编排）：</strong>只作为调用方传入 <code style="font-family: var(--mono)">query_text + filters</code>，拿回 <code style="font-family: var(--mono)">TopK candidates[]</code>；在候选上做规则打分与最终选片。</li>
+        </ul>
+        <h4>3.5.1 后端检索接口（Retrieval Service）</h4>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">query_text + filters</code>（filters 可由 beat 的 tags 自动生成）。</p>
+        <p><strong>输出：</strong>TopK，每项含 <code style="font-family: var(--mono)">clip_id</code>、score、metadata、<code style="font-family: var(--mono)">recall_source</code>。</p>
+        <p><strong>关键技术：</strong>Chroma（PoC）/ Milvus / pgvector / 云向量；embedding 由后端统一版本；metadata 过滤（brand、时长、权限等）；混合召回 vector + tag union。</p>
+        <h4>3.5.2 本地规则匹配（Matching）</h4>
+        <p><strong>输入：</strong>beat（feature + tags + <code style="font-family: var(--mono)">duration_hint_sec</code>）+ TopK。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">MatchResult</code>（Top1 + 可解释子分）。</p>
+        <p><strong>通用规则维度：</strong><code style="font-family: var(--mono)">vector_score</code>；tag 重叠（Jaccard / 命中率）；时长与 <code style="font-family: var(--mono)">duration_hint_sec</code> 接近度与可裁剪约束；可选 hard_filters（brand、画幅、可用性等）。</p>
+        <p><strong>落地要点：</strong>TopK 常取 5～10；召回为空须放宽 must_tags 或时长再召；保留 Top2 / Top3 作渲染失败回退。</p>
+
+        <h4>3.5.3 生产可用：硬过滤 + 多维打分 + 可解释输出</h4>
+        <p><strong>A. 硬过滤（不满足则剔除）：</strong>brand / 类目；可用性（未下架、版权、水印、画幅）；<code style="font-family: var(--mono)">candidate_duration &gt;= beat.duration_hint</code>（否则剪不够）；must_not（竞品 / 禁用词命中 OCR 或 tags）。部分可由后端代过滤，本地仍建议兜底校验。</p>
+        <p><strong>B. 多维打分（0～1 归一后加权）：</strong></p>
+        <p style="font-family: var(--mono); font-size: 0.9rem">
+          S = w_sim·S_sim + w_tag·S_tag + w_dur·S_dur + w_scene·S_scene + w_shot·S_shot + w_ocr·S_ocr − w_rep·P_repeat
+        </p>
+        <ul>
+          <li><strong>S_sim：</strong>后端向量分归一化。</li>
+          <li><strong>S_tag：</strong>Jaccard(beat.tags, clip.tags) 或命中率；beat.tags 空时中性分 0.5。</li>
+          <li><strong>S_dur：</strong>clip 时长与 hint 接近度（且须可裁剪）。</li>
+          <li><strong>S_scene / S_shot / S_ocr：</strong>场景、景别、OCR 关键词命中加分。</li>
+          <li><strong>P_repeat：</strong>同一 <code style="font-family: var(--mono)">video_id</code> 已在前面 beat 选用则惩罚。</li>
+        </ul>
+        <p><strong>默认权重（可调）：</strong>w_sim=0.50，w_tag=0.20，w_dur=0.10，w_scene=0.08，w_shot=0.07，w_ocr=0.05，w_rep=0.20。</p>
+        <p><strong>C. 选片：</strong>总分 Top1 成片，保留 Top2 / Top3 备选。</p>
+        <p><strong>D. 兜底：</strong>放宽 must_tags、扩大时长、回退品牌通用模板库。</p>
+
+        <h4>3.5.4 Re-rank 位置与可选 Learning-to-Rank</h4>
+        <p>两阶段：<strong>Recall</strong>（后端）→ <strong>Re-rank</strong>（本地加权，本质可解释重排）。后续可把特征（vector_score、tag_score、duration_score、scene、ocr_hit、quality…）喂给 LR / XGBoost / 小 MLP，用「被采纳 (beat, clip)」为正、TopK 内未采纳为负构造训练数据，自动学习权重。</p>
+
+        <h3>3.6 模块 5：装饰元素规划（LLM）</h3>
+        <p><strong>目标：</strong>在已确定 beats、匹配 clips、TTS 节奏基础上，生成装饰方案（剪映类：字幕样式、贴纸、转场、音效触发等）。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">beats[]</code>（含 <code style="font-family: var(--mono)">char_timings</code>）、<code style="font-family: var(--mono)">matches[]</code>。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">DecorationPlan</code>（结构化 JSON：字体 / 描边 / 入场动画、贴纸位与出现时间、切点转场与滤镜、音效关键字等）。</p>
+        <p><strong>关键技术：</strong>LLM + JSON Schema；素材库约束（仅允许 sticker_pack / effect_pack 内资源）。</p>
+        <p><strong>落地要点：</strong>可校验（不挡主体、密度可控、资源可用）；不合规回退默认模板。</p>
+
+        <h3>3.7 模块 6：Timeline 协议组装</h3>
+        <p><strong>目标：</strong>将模块 2 / 3 / 4 / 5 产物组装为渲染引擎可消费的 Timeline JSON。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">matches[]</code>、TTS（<code style="font-family: var(--mono)">audio_url</code> + <code style="font-family: var(--mono)">char_timings</code>）、<code style="font-family: var(--mono)">bgm</code>、<code style="font-family: var(--mono)">decoration_plan</code>。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">Timeline JSON</code>（版本化 Schema）。</p>
+        <p><strong>关键技术：</strong>时间对齐以 TTS 时长为主导反推画面时长与切点；缺素材 / 缺装饰的默认回退；落库前 schema 校验与静态检查。</p>
+
+        <h4>3.7.1 背景音乐（BGM）：人工打标库</h4>
+        <p><strong>目标：</strong>按风格与平台从人工标注音乐库选 BGM，裁剪 / 循环 / 淡入淡出 / 音量曲线（含口播 ducking）。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">brief.style</code>、成片总时长、可选 beats 节奏或 <code style="font-family: var(--mono)">bgm_style</code>。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">bgm_id</code>、<code style="font-family: var(--mono)">bgm_url</code>、使用区间、<code style="font-family: var(--mono)">volume_envelope</code>。</p>
+        <p><strong>关键技术：</strong>DB 按 <code style="font-family: var(--mono)">style_tag</code>、BPM、是否有人声、mood 过滤；同风格随机或加权随机；FFmpeg 裁剪循环与混音；可选 ducking。</p>
+        <p><strong>落地要点：</strong>稳定 <code style="font-family: var(--mono)">style_tag</code> 与版权字段；BGM 短于成片时循环 / 拼接 / 换曲按平台策略。</p>
+
+        <h4>3.7.2 渲染输出成片（模块 6.2）</h4>
+        <p><strong>目标：</strong>将 Timeline JSON 转为可交付 MP4（或 URL）。</p>
+        <p><strong>输入：</strong><code style="font-family: var(--mono)">timeline_json</code>、各轨所需素材 URL（视频 HD、TTS、BGM、贴纸字体特效）。</p>
+        <p><strong>输出：</strong><code style="font-family: var(--mono)">final_video_url</code>、<code style="font-family: var(--mono)">render_report</code>（耗时、失败原因、缺失列表）。</p>
+        <p><strong>方式 A（推荐生产）：</strong>云剪辑 / 模板化渲染引擎，异步任务 <code style="font-family: var(--mono)">submitted → running → success/failed</code>，回调或轮询。</p>
+        <p><strong>方式 B（PoC / 内网）：</strong>自建 FFmpeg <code style="font-family: var(--mono)">filter_complex</code> 拼接、叠字幕贴纸、混音；高级动效支持有限但可验证闭环。</p>
+        <p><strong>落地要点：</strong>渲染前静态检查时间轴与资源可达；OSS 预热与缓存；TTS 为主、BGM ducking、结尾淡出；缺资源回退默认与备选 clip。</p>
+
+        <h3>3.8 与当前仓库实现的映射</h3>
+        <ul>
+          <li><strong>模块 1 / 2：</strong><code style="font-family: var(--mono)">ai_clip/llm/storyboard_copy.py</code>、<code style="font-family: var(--mono)">ai_clip/llm/retrieval_query.py</code></li>
+          <li>
+            <strong>模块 4：</strong>后端 PoC <code style="font-family: var(--mono)">content_retrieval/app.py</code>（<code style="font-family: var(--mono)">/v1/recall</code>）、<code style="font-family: var(--mono)">content_retrieval/store.py</code>；客户端
+            <code style="font-family: var(--mono)">ai_clip/retrieval/content_retrieval_client.py</code>；本地规则
+            <code style="font-family: var(--mono)">ai_clip/matching/scoring.py</code>、<code style="font-family: var(--mono)">ai_clip/matching/matcher.py</code>
+          </li>
+          <li><strong>模块 3 / 5 / 6：</strong>当前仓库以文档为主（待接真实 TTS、装饰、Timeline、渲染）。</li>
+        </ul>
+
+        <h3>3.9 生产必备补充</h3>
+        <h4>合规与可用性</h4>
+        <p>模块 1 / 2 后做文案合规（广告法风险词、禁用词、敏感词）；素材版权、下架、画幅、水印、可裁剪时长；Timeline schema 与 URL 可达性校验。</p>
+        <h4>跨分镜全局策略</h4>
+        <p>去重（避免多 beat 同一 video_id 或过于相邻重复）；卖点 / 景别 / 场景覆盖；某 beat TopK 全不可用时的放宽与模板兜底。</p>
+        <h4>观测与复盘</h4>
+        <p><code style="font-family: var(--mono)">trace_id</code> 贯穿：文案 → 召回 → 重排 → TTS → 装饰 → timeline → 渲染；落库保留每 beat 的 TopK、最终选择、各子分与过滤原因，便于调参。</p>
       </div>
     </article>
     <footer class="site-footer">

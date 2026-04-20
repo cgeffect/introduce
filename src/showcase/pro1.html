@@ -33,7 +33,10 @@
           <li><strong>桌面专业端：</strong>以桌面应用形态承载时间线、素材管理与重度渲染任务，适合长时间剪辑与键盘精操。</li>
           <li><strong>浏览器监看与协同：</strong>导演、客户或异地同事用浏览器即可监看当前时间线输出，降低传片与对齐成本。</li>
           <li><strong>Web 侧延续工作流：</strong>在浏览器中完成成片预览、参数微调、导出等；可按业务开放不同深度的编辑能力。</li>
-          <li><strong>智能化辅助（可选）：</strong>在脚本、分镜、口播要点或包装元素上引入大模型或规则引擎，缩短从创意到可剪素材的距离。</li>
+          <li>
+            <strong>智能化辅助（可选）：</strong>在脚本、分镜、口播要点或包装元素上引入大模型或规则引擎；本页实验形态为 <strong>LangChain + 本机 Ollama（Qwen3:8b）</strong>，见
+            <a href="#llm-local-langchain">第七节</a>。
+          </li>
           <li><strong>复杂包装演示：</strong>贴纸、动效、多层字幕与图形等可在 Web 链路中验证效果，便于与投放物料规范对齐。</li>
         </ul>
 
@@ -74,7 +77,9 @@
           <video controls preload="metadata" playsinline>
             <source src="../resource/pro1/4_web_LLM.mp4" type="video/mp4" />
           </video>
-          <figcaption>4 · 使用LLM对话来编辑视频</figcaption>
+          <figcaption>
+            4 · 使用 LLM 对话来编辑视频（<a href="#llm-local-langchain">本地模型与 LangChain 调用见第七节</a>）
+          </figcaption>
         </figure>
         <figure>
           <video controls preload="metadata" playsinline>
@@ -94,13 +99,16 @@
           <li><strong>实时传输：</strong>WebRTC 用于低延迟视频流；信令由 <strong>LiveServer 内嵌的 Socket</strong>（如 WebSocket）承载，与 SRTP 媒体面分离，实现监看端与剪辑端的秒级反馈；可配合 STUN/TURN 策略适配跨网段场景。</li>
           <li><strong>语言与构建：</strong>性能敏感路径以 <strong>C++</strong> 为主；脚本与工具链可用 Node / Shell；工程组织上常见 CMake 或各平台 IDE 工程。</li>
           <li><strong>媒体处理：</strong>时间线解码、封装与导出侧可衔接 FFmpeg 等成熟组件，保证格式覆盖与工程可控性。</li>
+          <li>
+            <strong>智能化（本机实验形态）：</strong>对话式辅助走 <strong>LangChain</strong> 发起调用，经其 <strong>HTTP 接口</strong>对接本机 <strong>Ollama</strong> 暴露的 API；模型为 <strong>Qwen3:8b</strong> 量级（磁盘约 <strong>5GB</strong> 档的小模型），跑在 <strong>Mac 笔记本本地</strong>。详见下文<strong>第七节</strong>。
+          </li>
         </ul>
         <h3>实现原理（概要）</h3>
         <p>
           整体可抽象为：<strong>时间线与素材语义 → 合成图（帧缓冲）→（可选）编码为视频流或文件 → 传输 → 对端解码与呈现</strong>。桌面端负责「算得动、对得准」的重度合成；浏览器端消费同一套协议或中间表示，做轻量交互、监看与导出，从而降低多端分裂带来的色差、帧错位与重复导出。
         </p>
         <p>
-          智能化能力通常以<strong>异步服务或本地插件</strong>形式接入：先生成结构化建议（分镜、文案、参数包），再写回时间线或包装轨道，避免在实时预览线程内阻塞用户操作。
+          智能化能力通常以<strong>异步服务或本地插件</strong>形式接入：当前实验链路由 <strong>LangChain 经 HTTP 调用本机 Ollama</strong> 拉取生成结果，再解析为结构化建议（分镜、文案、参数包等）写回时间线或包装轨道，避免在实时预览线程内阻塞用户操作。
         </p>
         <div class="doc-actions">
           <a
@@ -172,6 +180,43 @@ flowchart LR
           与本方案同源的开源形态、本机 WebSocket 端口与浏览器 API 细节，见技术文章
           <a href="../articles/e2e-preview-system.html">《基于 WebRTC 实现的端到端渲染预览》</a>。
         </p>
+
+        <h2 id="llm-local-langchain">七、专题：本地大模型调用（Qwen3:8b · Ollama · LangChain HTTP）</h2>
+        <p>
+          Demo 中「对话驱动编辑」一类能力，走的是<strong>完全本地化</strong>的实验栈：<strong>Qwen3:8b</strong> 作为主力模型（约 <strong>5GB</strong> 量级的「小」模型权重，相对云端大参数量级而言），通过 <strong>Ollama</strong> 部署在 <strong>Mac 笔记本</strong>上常驻服务；业务侧<strong>统一用 LangChain 去调大模型</strong>——在本地通过 LangChain 提供的 <strong>HTTP 风格接口</strong>（对接 Ollama 兼容的 REST 端点）发起请求、拿回文本，再交给上层解析成时间线或指令，而不是在应用里手写裸 HTTP 拼 prompt。
+        </p>
+
+        <h3>7.1 部署与调用路径</h3>
+        <ul>
+          <li><strong>模型：</strong>Qwen3:8b（8B 参数档；本机磁盘占用约 5GB 量级，视量化与打包略有浮动）。</li>
+          <li><strong>推理服务：</strong>Ollama 在 Mac 上拉起本地进程，对外暴露兼容的 HTTP API（典型为 <code style="font-family: var(--mono)">localhost</code> 端口，由 Ollama 管理）。</li>
+          <li>
+            <strong>应用集成（强调点）：</strong>由 <strong>LangChain</strong> 封装对 Ollama 的访问——使用其面向本地服务的 HTTP 客户端 / Chat 模型封装，统一处理请求体、流式或非流式响应与错误重试边界；应用代码主要与 <strong>LangChain 的链或 Runnable</strong> 打交道，再取回字符串或结构化结果。
+          </li>
+        </ul>
+
+        <h3>7.2 为何刻意放在本机</h3>
+        <p>
+          这样可以在<strong>不外传素材与提示词</strong>的前提下联调整条「自然语言 → 协议 / 编辑意图」链路，也方便与 Electron / 本地渲染进程放在同一台开发机上调试。代价是算力与内存都压在笔记本上，和云端大模型相比，<strong>首 token、整段生成的延迟会明显更大</strong>，交互上要有「等一等」的预期。
+        </p>
+
+        <h3>7.3 体验与效果边界（如实说明）</h3>
+        <p>
+          在 Mac 笔记本本地跑 8B 档模型，<strong>速度偏慢</strong>是常态：并发一高、上下文略长，或同时开着非编与预览，都会进一步拉长响应时间。效果上，与当前一线云端大模型或更大参数量相比，<strong>指令遵循、长上下文稳定性与「剪辑领域」细节仍会差一截</strong>——更适合做<strong>原型验证、离线演示与可控成本的迭代</strong>；若要做严肃生产，通常会换成更强算力、更大模型或经微调的专用小模型，并重新评估 LangChain 链路与延迟预算。
+        </p>
+
+        <figure class="diagram-block" aria-label="LangChain HTTP 调用本机 Ollama">
+          <pre class="mermaid">
+flowchart LR
+  UI[对话 / 编排] --> LC["LangChain\nHTTP 调用封装"]
+  LC -->|"Ollama REST"| OLL["Ollama 本机服务\nQwen3:8b 约 5GB"]
+  OLL -->|生成文本| LC
+  LC -->|解析后写回| UI
+          </pre>
+          <figcaption>
+            图：由 LangChain 走 HTTP 调 Ollama；Qwen3:8b 由 Ollama 加载在 Mac 本机。与 WebRTC / 渲染可同机并存，职责分离。
+          </figcaption>
+        </figure>
       </div>
     </article>
     <footer class="site-footer">
