@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WASM 中 OpenGL 使用实践 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>WASM 中 OpenGL 使用实践（Emscripten）</h1>
+        <p class="meta">Emscripten · WebGL2 · GLFW / SDL / EGL</p>
+      </header>
+      <div class="prose">
+        <h2>一、背景：为什么要在 WASM 里做 OpenGL</h2>
+        <p>
+          在剪辑与渲染类系统里，端云一致是长期目标：桌面端、云端与浏览器端尽量共享渲染语义，降低「预览看着对、最终结果不一致」的风险。WASM
+          路径的价值在于：保留 C/C++ 图形代码组织方式，把核心渲染逻辑迁到浏览器可运行环境，用于预览、工具链验证与跨端能力打底。
+        </p>
+
+        <h2>二、实现边界：WASM 里的 OpenGL 本质是什么</h2>
+        <p>
+          工程上通常说「WASM 里用 OpenGL」，更准确地讲是：通过 Emscripten 把 OpenGL / OpenGL ES 风格接口映射到浏览器提供的
+          WebGL/WebGL2。也就是说，代码层可保持 GL 编程模型，但运行时仍受浏览器图形能力、上下文生命周期和安全策略约束。
+        </p>
+        <ul>
+          <li><strong>可复用：</strong>着色器组织、渲染流程、VBO/VAO、多数 GL 语义。</li>
+          <li><strong>需适配：</strong>上下文创建、事件循环、文件系统与资源加载方式。</li>
+          <li><strong>不等价点：</strong>浏览器 API 限制、扩展支持差异、线程与内存模型差异。</li>
+        </ul>
+
+        <h2>三、项目结构与实验分组</h2>
+        <p>
+          以 <code style="font-family: var(--mono)">wasm_opengl</code> 这类仓库组织为例，可以按「不同窗口/上下文方案」做并列实验，验证同一渲染目标在多条路径下的可行性：
+        </p>
+        <ul>
+          <li><code style="font-family: var(--mono)">wasm_egl</code>：EGL + OpenGL ES 路径。</li>
+          <li><code style="font-family: var(--mono)">wasm_glfw3</code> / <code style="font-family: var(--mono)">wasm_glfw3_gl3</code>：GLFW 风格窗口与上下文管理。</li>
+          <li><code style="font-family: var(--mono)">wasm_sdl</code>：SDL2 集成路径。</li>
+          <li><code style="font-family: var(--mono)">wasm_webgl2</code>：直接面向 WebGL2 能力验证。</li>
+        </ul>
+        <p>
+          这种拆法的好处是：同一台机器、同一套工具链下可快速对比初始化复杂度、兼容性与调试体验，便于后续选择主路径。
+        </p>
+
+        <h2>四、零基础：从环境到第一个页面</h2>
+        <p>下面按“第一次上手”写完整步骤，照着执行即可。</p>
+        <ol>
+          <li>安装 Emscripten SDK。</li>
+          <li>加载环境变量，确认 <code style="font-family: var(--mono)">emcc</code> 可用。</li>
+          <li>进入某个示例目录并构建。</li>
+          <li>启动本地 HTTP 服务，用浏览器打开。</li>
+        </ol>
+        <pre class="article-code"><code># 1) 安装 emsdk（首次）
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install latest
+./emsdk activate latest
+
+# 2) 当前终端加载环境（每次新终端都要做）
+source ./emsdk_env.sh
+emcc -v
+
+# 3) 回到项目（示例）
+cd /path/to/wasm_opengl/wasm_glfw3
+./build.sh
+
+# 4) 启动本地服务
+python3 -m http.server 8000
+# 浏览器打开 http://localhost:8000</code></pre>
+        <p>
+          注意：WASM 示例一定要通过 HTTP/HTTPS 打开，不能双击 <code style="font-family: var(--mono)">html</code> 直接走
+          <code style="font-family: var(--mono)">file://</code>。
+        </p>
+
+        <h2>五、不同方式的代码写法（可直接对照）</h2>
+        <p>下面给出各路径最常见的“最小可运行”代码骨架，重点是初始化与主循环。</p>
+
+        <h3>5.1 EGL + OpenGL ES（wasm_egl）</h3>
+        <pre class="article-code"><code>// 关键：创建 EGL 上下文后进入 emscripten 主循环
+EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+eglInitialize(display, 0, 0);
+eglChooseConfig(display, attribs, &amp;config, 1, &amp;numConfigs);
+EGLSurface surface = eglCreateWindowSurface(display, config, 0, 0);
+EGLContext context = eglCreateContext(display, config, EGL_NO_CONTEXT, ctxAttribs);
+eglMakeCurrent(display, surface, surface, context);
+
+GLuint program = createProgram(vsSrc, fsSrc);
+glUseProgram(program);
+
+emscripten_set_main_loop([](){
+  glViewport(0, 0, 800, 600);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+}, 0, 1);</code></pre>
+
+        <h3>5.2 GLFW3 + GLES（wasm_glfw3）</h3>
+        <pre class="article-code"><code>glfwInit();
+glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+GLFWwindow* win = glfwCreateWindow(800, 600, "wasm_glfw3", nullptr, nullptr);
+glfwMakeContextCurrent(win);
+
+GLuint vao, vbo;
+glGenVertexArrays(1, &amp;vao);
+glBindVertexArray(vao);
+glGenBuffers(1, &amp;vbo);
+glBindBuffer(GL_ARRAY_BUFFER, vbo);
+glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+emscripten_set_main_loop_arg([](void* arg){
+  GLFWwindow* w = (GLFWwindow*)arg;
+  glClear(GL_COLOR_BUFFER_BIT);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glfwSwapBuffers(w);
+  glfwPollEvents();
+}, win, 0, 1);</code></pre>
+
+        <h3>5.3 SDL2 + GLES（wasm_sdl）</h3>
+        <pre class="article-code"><code>SDL_Init(SDL_INIT_VIDEO);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+SDL_Window* win = SDL_CreateWindow("wasm_sdl", 0, 0, 800, 600, SDL_WINDOW_OPENGL);
+SDL_GLContext glctx = SDL_GL_CreateContext(win);
+
+emscripten_set_main_loop([](){
+  SDL_Event e;
+  while (SDL_PollEvent(&amp;e)) { /* input */ }
+  glClear(GL_COLOR_BUFFER_BIT);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  SDL_GL_SwapWindow(win);
+}, 0, 1);</code></pre>
+
+        <h3>5.4 直接 WebGL2 绑定（wasm_webgl2）</h3>
+        <pre class="article-code"><code>#include &lt;emscripten/html5_webgl.h&gt;
+EMSCRIPTEN_WEBGL_CONTEXT_HANDLE ctx;
+
+EmscriptenWebGLContextAttributes attrs;
+emscripten_webgl_init_context_attributes(&amp;attrs);
+attrs.majorVersion = 2; // WebGL2
+ctx = emscripten_webgl_create_context("#canvas", &amp;attrs);
+emscripten_webgl_make_context_current(ctx);
+
+GLint n = 0;
+glGetIntegerv(GL_NUM_EXTENSIONS, &amp;n);
+for (int i = 0; i &lt; n; ++i) {
+  const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
+  printf("ext: %s\n", ext);
+}</code></pre>
+
+        <h3>5.5 通用着色器与三角形示例</h3>
+        <pre class="article-code"><code>// 顶点着色器（GLES2/WebGL2 通用写法）
+const char* VS = R"(
+attribute vec3 aPos;
+void main() { gl_Position = vec4(aPos, 1.0); }
+)";
+const char* FS = R"(
+precision mediump float;
+void main() { gl_FragColor = vec4(1.0, 0.2, 0.1, 1.0); }
+)";
+
+float vertices[] = {
+   0.0f,  0.5f, 0.0f,
+  -0.5f, -0.5f, 0.0f,
+   0.5f, -0.5f, 0.0f
+};</code></pre>
+
+        <h3>5.6 对应构建命令示例</h3>
+        <pre class="article-code"><code># GLFW3
+em++ main.cpp -O3 -s WASM=1 -s USE_GLFW=3 -o app.html
+
+# SDL2
+em++ main.cpp -O3 -s WASM=1 -s USE_SDL=2 -o app.html
+
+# EGL / GLES
+emcc main.c -O3 -s WASM=1 -s FULL_ES2=1 -o app.html
+
+# WebGL2
+em++ main.cpp -O3 -s WASM=1 -s MAX_WEBGL_VERSION=2 -o app.html</code></pre>
+        <p><strong>执行顺序建议：</strong>先跑 <code style="font-family: var(--mono)">wasm_webgl2</code> 检查上下文，再跑 GLFW/SDL，最后跑 EGL 方案做对比。</p>
+
+        <h2>六、工程实践里最容易踩的坑</h2>
+        <ul>
+          <li><strong>上下文差异：</strong>桌面端可用特性不代表 WebGL2 一定可用，扩展要做运行时探测。</li>
+          <li><strong>资源加载：</strong>浏览器端路径、CORS、异步加载顺序会直接影响纹理/模型可用性。</li>
+          <li><strong>性能认知：</strong>WASM 并不自动等于高性能，瓶颈常在 JS/WASM 边界、状态切换与过度上传。</li>
+          <li><strong>调试方式：</strong>需要把日志、GL 错误检查与帧阶段统计做成浏览器友好输出。</li>
+        </ul>
+
+        <h2>七、与视频生产链路的关系</h2>
+        <p>
+          这类 WASM OpenGL 实验不直接等同「完整在线剪辑产品」，但非常适合作为端云一致能力的验证层：一方面校验渲染表达是否可迁移到 Web，另一方面为后续的
+          Web 预览、轻量编辑与跨端协议对齐提供技术依据。对音视频生产系统来说，它是连接原生渲染与浏览器工作流的重要中间层。
+        </p>
+
+        <h2>八、参考</h2>
+        <ul>
+          <li>
+            <a href="https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html" target="_blank" rel="noopener noreferrer">Emscripten OpenGL 支持说明</a>
+          </li>
+          <li>
+            <a href="https://webgl2fundamentals.org/" target="_blank" rel="noopener noreferrer">WebGL2 Fundamentals</a>
+          </li>
+        </ul>
+        <div class="doc-actions">
+          <a class="btn btn--primary" href="https://github.com/cgeffect/wasm_opengl" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

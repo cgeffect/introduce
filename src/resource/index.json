@@ -35,6 +35,11 @@
       "id": "pro7",
       "name": "专业视频编辑应用",
       "github": "https://github.com/cgeffect/YouCut/tree/1.1.1"
+    },
+    {
+      "id": "pro9",
+      "name": "Web Render",
+      "github": "https://github.com/cgeffect/web-render"
     }
   ],
   "industryInsights": [

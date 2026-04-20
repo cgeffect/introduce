@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>macOS 上 RTP 推拉流实践 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>macOS 上 RTP 推拉流实践（H.264/H.265/AAC）</h1>
+        <p class="meta">RTP/RTCP · SDP · FFmpeg/播放器联调</p>
+      </header>
+      <div class="prose">
+        <h2>一、这篇文章讲什么</h2>
+        <p>
+          这篇主要介绍在 macOS 环境下，如何把 H.264 / H.265 / AAC 通过 RTP 做发送与接收，并配套 SDP、RTCP 与
+          ffplay/VLC 联调，形成可观测、可排障的实验闭环。目标不是「一次做全协议栈」，而是把关键链路跑通并可定位问题。
+        </p>
+
+        <h2>二、工程能力拆分</h2>
+        <p>从仓库结构看，这类工程通常会拆成几层：</p>
+        <ul>
+          <li><strong>收发核心：</strong>RTP 包封装/解包、序列号与时间戳处理、负载类型识别。</li>
+          <li><strong>控制反馈：</strong>RTCP 收发（丢包、时序、会话健康度反馈）。</li>
+          <li><strong>会话描述：</strong>SDP 生成与消费，连接 ffplay/VLC 或其它接收端。</li>
+          <li><strong>协议扩展实验：</strong>如 GB28181、RTSP Server、媒体服务端样例等。</li>
+          <li><strong>验证工具链：</strong>hexdump、播放器、日志对照，保证可排障。</li>
+        </ul>
+
+        <h2>三、最小可运行路径</h2>
+        <p>下面按“从零到能播”的顺序写，适合第一次跑 RTP：</p>
+        <ol>
+          <li>先构建项目，确保发送/接收可执行文件已生成。</li>
+          <li>启动发送端（如 <code style="font-family: var(--mono)">rtp_265_send</code>），确认生成 SDP。</li>
+          <li>用 ffplay 打开 SDP，先验证是否有画面/声音。</li>
+          <li>再启动接收端（如 <code style="font-family: var(--mono)">rtp_265_recv</code>）对比日志。</li>
+          <li>最后加入 RTCP 收发，观察统计与异常反馈。</li>
+        </ol>
+        <pre class="article-code"><code># 1) 构建（示意）
+git clone https://github.com/cgeffect/rtp_macos.git
+cd rtp_macos
+./build.sh   # 或 cmake -S . -B build && cmake --build build -j
+
+# 2) 发送端（终端A）
+./src/rtp_265_send
+
+# 3) 播放器验证（终端B）
+ffplay -protocol_whitelist "file,rtp,udp,tcp,crypto,data" ./x265.sdp
+
+# 4) 接收端（终端C，可选）
+./src/rtp_265_recv</code></pre>
+        <p>
+          如果你先想降低复杂度，建议从 <code style="font-family: var(--mono)">H.264 单视频</code> 跑通，再加 AAC，再看 A/V 同步和 RTCP。
+        </p>
+
+        <h2>四、实现时最容易踩的坑</h2>
+        <ul>
+          <li><strong>时间戳基准错位：</strong>音频与视频时钟单位不同，容易造成嘴型漂移。</li>
+          <li><strong>NALU 分片与重组：</strong>H.264/H.265 在 MTU 下的分片边界处理出错会花屏或黑屏。</li>
+          <li><strong>SDP 描述不完整：</strong>参数缺失导致播放器能连上但无法正常解码。</li>
+          <li><strong>网络抖动处理不足：</strong>无抖动缓冲/重排策略时，弱网下体验显著恶化。</li>
+        </ul>
+
+        <h2>五、与生产系统的关系</h2>
+        <p>
+          RTP 工程价值通常体现在两端：一端是低延迟实时链路（摄像头、监控、实时互动）；另一端是协议互通能力（与 RTSP、GB28181 或媒体服务对接）。
+          对视频生产系统来说，它是「采集/接入层」的重要能力，后续可衔接转码、录制、回放与分发。
+        </p>
+
+        <h2>六、建议的工程化增强</h2>
+        <ul>
+          <li>统一 trace_id，贯穿发送、接收、RTCP 与播放器验证。</li>
+          <li>将关键字段（seq、timestamp、ssrc、payload_type）结构化落日志。</li>
+          <li>把常用联调命令写成脚本，降低重复排障成本。</li>
+          <li>补一组可复现弱网条件（延迟/丢包/乱序）回归测试。</li>
+        </ul>
+
+        <div class="doc-actions">
+          <a class="btn btn--primary" href="https://github.com/cgeffect/rtp_macos" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

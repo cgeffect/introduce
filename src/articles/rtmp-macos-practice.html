@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>macOS 上 RTMP 推拉流实践 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>macOS 上 RTMP 推拉流实践</h1>
+        <p class="meta">RTMP · FLV 封装 · 发送/接收链路</p>
+      </header>
+      <div class="prose">
+        <h2>一、为什么还要做 RTMP</h2>
+        <p>
+          RTMP 在传统直播与推流接入里仍有现实价值：协议成熟、工具链丰富、与 SRS/ZLMediaKit 等服务端对接成本低。对工程侧来说，掌握
+          RTMP 的打包与收发细节，能快速搭出稳定的推流入口，再衔接转码、录制与分发。
+        </p>
+
+        <h2>二、工程关注点</h2>
+        <ul>
+          <li><strong>封装解析：</strong>FLV tag 的音视频负载拆解与重组。</li>
+          <li><strong>发送链路：</strong>H.264、AAC 或 FLV 整体推送到 RTMP 服务器。</li>
+          <li><strong>接收链路：</strong>从 RTMP 拉流并提取 AVC/AAC，供后续处理。</li>
+          <li><strong>格式转换实验：</strong>FLV 到 TS/PS/fMP4 等中间格式验证。</li>
+        </ul>
+
+        <h2>三、最小联调闭环</h2>
+        <p>按下面顺序走，基本都能定位到“是推流问题还是服务端问题”。</p>
+        <ol>
+          <li>本地或远端部署流媒体服务（SRS / ZLMediaKit 等）。</li>
+          <li>发送端推流到指定 <code style="font-family: var(--mono)">rtmp://</code> 地址。</li>
+          <li>接收端或播放器验证拉流、音视频同步与关键帧恢复。</li>
+          <li>出现异常时，通过二进制检查与日志对照定位封装问题。</li>
+        </ol>
+        <pre class="article-code"><code># 1) 构建
+git clone https://github.com/cgeffect/rtmp_macos.git
+cd rtmp_macos
+./build.sh   # 或 cmake 构建
+
+# 2) 启动 SRS/ZLMediaKit（示例地址）
+# rtmp://127.0.0.1/live/test
+
+# 3) 发送端推流（按项目可执行名调整）
+./src/send_flv
+
+# 4) 播放器拉流验证
+ffplay rtmp://127.0.0.1/live/test
+
+# 5) 如需拆流调试
+./src/recv_flv</code></pre>
+        <p>
+          实际调试时，先用最简单的一路视频跑通，再加音频，再做 FLV 到 TS/PS/fMP4 的转换实验，问题会更好定位。
+        </p>
+
+        <h2>四、常见问题与排障思路</h2>
+        <ul>
+          <li><strong>推得上去但播不出来：</strong>优先检查 FLV tag 类型、关键帧与 SPS/PPS 是否正确。</li>
+          <li><strong>有画无声/有声无画：</strong>检查音视频时间戳与编码参数是否匹配。</li>
+          <li><strong>间歇卡顿：</strong>看发送速率与服务端缓冲策略，确认是否有突发阻塞。</li>
+          <li><strong>容器转换异常：</strong>先做 hexdump 与帧级解析，明确错误发生在封装还是编码层。</li>
+        </ul>
+        <pre class="article-code"><code>hexdump -C ../res/wubai.aac | head -20</code></pre>
+
+        <h2>五、与 RTP 路线如何分工</h2>
+        <p>
+          在同一套音视频系统里，RTMP 常用于推流接入与传统直播链路；RTP/RTSP 更偏实时交互与低延迟传输。两条路线并不冲突，关键是统一编解码参数、
+          时间基与观测指标，避免系统边界处反复补锅。
+        </p>
+
+        <h2>六、工程化建议</h2>
+        <ul>
+          <li>把推流地址、鉴权、重连策略做成配置项，不写死在代码里。</li>
+          <li>统一输出发送/接收统计（码率、帧率、关键帧间隔、重连次数）。</li>
+          <li>将常见协议转换与解析流程做成独立工具，便于离线排障。</li>
+        </ul>
+
+        <div class="doc-actions">
+          <a class="btn btn--primary" href="https://github.com/cgeffect/rtmp_macos" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>

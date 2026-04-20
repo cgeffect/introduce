@@ -37,7 +37,7 @@
         <article class="article-entry" id="entry-cuda-gpu">
           <h3 class="article-entry__title">Linux 上 CUDA–OpenGL 全链路 GPU 加速</h3>
           <p class="article-entry__summary">
-            独立成篇：NVDEC 与 NVENC、两段 CUDA 中转、各实验模块的处理步骤与性能对比表；附总览流程图与官方 Codec/CUDA 文档链接。
+            聚焦 Linux 上的端到端 GPU 视频处理链路：从 NVDEC 解码、CUDA 中转到 NVENC 编码，结合实验步骤与性能对比，说明不同路径的延迟与吞吐差异，并附完整流程图及官方 Codec/CUDA 参考文档。
           </p>
           <div class="article-entry__links">
             <a class="article-entry__action" href="linux-cuda-gpu-pipeline.html">打开</a>
@@ -61,6 +61,46 @@
           </p>
           <div class="article-entry__links">
             <a class="article-entry__action" href="ai-timeline.html">打开</a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-wasm-opengl">
+          <h3 class="article-entry__title">WASM 中 OpenGL 使用实践（Emscripten）</h3>
+          <p class="article-entry__summary">
+            介绍 C/C++ 渲染代码迁移到浏览器侧的工程路径：EGL/GLFW/SDL/WebGL2 多方案实验、构建与运行链路、常见坑位与性能边界，并说明其在端云一致预览体系中的定位。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__action" href="wasm-opengl-practice.html">打开</a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-linux-soft-raster">
+          <h3 class="article-entry__title">如何在 Linux 上使用软光栅渲染</h3>
+          <p class="article-entry__summary">
+            面向无 GPU 或强调可复现的环境，介绍 CPU 软光栅的最小渲染闭环、工程落地步骤、性能优化要点，以及在生产系统中与 GPU 路线协同的实践方式。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__action" href="linux-software-rasterizer.html">打开</a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-rtp-macos">
+          <h3 class="article-entry__title">macOS 上 RTP 推拉流实践</h3>
+          <p class="article-entry__summary">
+            围绕 H.264/H.265/AAC 的 RTP 收发，介绍 SDP/RTCP 联调、播放器验证与常见排障路径，覆盖从最小可运行到工程化增强的关键步骤。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__action" href="rtp-macos-practice.html">打开</a>
+          </div>
+        </article>
+
+        <article class="article-entry" id="entry-rtmp-macos">
+          <h3 class="article-entry__title">macOS 上 RTMP 推拉流实践</h3>
+          <p class="article-entry__summary">
+            从 FLV 封装解析到 RTMP 推拉流链路，梳理与 SRS/ZLMediaKit 的联调方式、常见故障定位方法，以及与 RTP 路线的工程分工。
+          </p>
+          <div class="article-entry__links">
+            <a class="article-entry__action" href="rtmp-macos-practice.html">打开</a>
           </div>
         </article>
       </section>

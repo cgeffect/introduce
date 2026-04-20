@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Linux 上使用软光栅渲染 · 王腾飞</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <article class="article-page">
+      <a class="back-link" href="index.html#tech-articles">← 返回技术文章与笔记</a>
+      <header>
+        <h1>如何在 Linux 上使用软光栅渲染</h1>
+        <p class="meta">CPU Rasterizer · 无 GPU 依赖 · 工程可控性</p>
+      </header>
+      <div class="prose">
+        <h2>一、什么时候需要软光栅</h2>
+        <p>
+          在 Linux 的服务端或 CI 场景里，常会遇到三类问题：没有可用 GPU、驱动环境不稳定、以及对渲染结果可重复性要求极高。软光栅（Software Rasterizer）在这些场景下的价值是：不依赖显卡与图形驱动，把渲染链路收敛到 CPU 与内存模型内，便于部署、调试和结果复现。
+        </p>
+
+        <h2>二、软光栅渲染管线（最小闭环）</h2>
+        <p>典型流程可以抽象为：</p>
+        <pre class="article-code"><code>顶点输入
+→ 顶点变换（MVP）
+→ 图元组装（三角形）
+→ 屏幕空间映射（viewport）
+→ 光栅化（扫描 / 边函数）
+→ 深度测试与颜色混合
+→ 帧缓冲输出（RGBA / BMP / PNG）</code></pre>
+        <p>
+          核心思想是把 GPU 固定功能与着色阶段，在 CPU 端用可控的数据结构和算法重建。虽然性能上限不如硬件渲染，但在离线渲染、测试基线、无卡环境中非常实用。
+        </p>
+
+        <h2>三、Linux 上的工程落地步骤</h2>
+        <ol>
+          <li><strong>准备构建链：</strong>GCC/Clang、CMake（或 Makefile），确认可在目标发行版构建。</li>
+          <li><strong>建立帧缓冲：</strong>定义颜色缓冲与深度缓冲，统一像素格式（常见 RGBA8）。</li>
+          <li><strong>打通三角形路径：</strong>先做“清屏 + 三角形填充 + 保存图片”，验证像素管线正确。</li>
+          <li><strong>补齐深度与插值：</strong>深度测试、重心坐标插值（UV/法线/颜色）。</li>
+          <li><strong>接入材质与光照：</strong>按需求增加纹理采样和基础光照模型。</li>
+          <li><strong>做离线输出：</strong>支持序列帧输出或批处理入口，接入上层工具链。</li>
+        </ol>
+
+        <h2>四、main 函数里的 OpenGL 初始化示例（用于调试显示）</h2>
+        <p>
+          软光栅主链路本身不依赖 GPU，但工程里常会在 Linux 上加一个 OpenGL 窗口用于调试显示（把 CPU 渲染出的 color buffer 上传成纹理再画出来）。下面是常见的
+          <code style="font-family: var(--mono)">main</code> 初始化骨架（GLFW + GLAD）：
+        </p>
+        <pre class="article-code"><code>#include &lt;glad/glad.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+
+int main() {
+  // 1) 初始化 GLFW 与 OpenGL 版本
+  if (!glfwInit()) return -1;
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+  // 2) 创建窗口与上下文
+  GLFWwindow* window = glfwCreateWindow(1280, 720, "SwRender Debug View", nullptr, nullptr);
+  if (!window) {
+    glfwTerminate();
+    return -1;
+  }
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1); // 可按需关掉垂直同步
+
+  // 3) 加载 OpenGL 函数
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return -1;
+  }
+
+  // 4) 视口与基础状态
+  glViewport(0, 0, 1280, 720);
+  glDisable(GL_DEPTH_TEST); // 仅做 2D 纹理显示时可关闭
+
+  // 5) 创建调试纹理（后续每帧把 CPU color buffer 上传到这里）
+  GLuint tex = 0;
+  glGenTextures(1, &amp;tex);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+  // 6) 主循环（示意）
+  while (!glfwWindowShouldClose(window)) {
+    // swRender(...) 先在 CPU 里生成 rgbaBuffer
+    // glTexSubImage2D(..., rgbaBuffer) 上传纹理
+    // drawFullScreenQuad();
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glDeleteTextures(1, &amp;tex);
+  glfwDestroyWindow(window);
+  glfwTerminate();
+  return 0;
+}</code></pre>
+        <p>
+          这段代码的定位是“可视化调试壳”：核心渲染仍发生在 CPU，OpenGL 仅负责把结果显示出来。若你要做纯离线渲染，可直接跳过窗口与 GL 初始化，输出 PNG/BMP 即可。
+        </p>
+
+        <h2>五、零基础：如何编译并跑起来</h2>
+        <p>如果你第一次在 Linux 上跑软光栅项目，建议按下面顺序操作。</p>
+        <pre class="article-code"><code># Ubuntu/Debian 依赖示例
+sudo apt update
+sudo apt install -y build-essential cmake pkg-config libglfw3-dev
+
+# 拉代码
+git clone https://github.com/cgeffect/SwRender.git
+cd SwRender
+
+# CMake 构建
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+
+# 运行（按项目实际可执行名替换）
+./build/sw_render_demo</code></pre>
+        <p>
+          若你只做离线渲染（不打开窗口），可使用无窗口入口，把输出写到
+          <code style="font-family: var(--mono)">output.png</code>。若需要可视化调试，再使用上面的 OpenGL 初始化壳。
+        </p>
+
+        <h2>六、性能优化要点（CPU 视角）</h2>
+        <ul>
+          <li><strong>减少分支：</strong>将热点路径中的条件分支收敛，提升流水线效率。</li>
+          <li><strong>缓存友好：</strong>按扫描线或 tile 组织访问，避免频繁跨行跳跃。</li>
+          <li><strong>数据布局：</strong>关键结构体尽量紧凑，减少 cache miss。</li>
+          <li><strong>并行化：</strong>按 tile / 行块做多线程拆分，控制写冲突。</li>
+          <li><strong>SIMD（可选）：</strong>对像素循环做 SSE/AVX 向量化。</li>
+        </ul>
+
+        <h2>七、与 GPU 路线如何配合</h2>
+        <p>
+          在生产系统里，软光栅不一定替代 GPU，而是作为补充：GPU 路线承担高吞吐实时渲染；软光栅路线承担无卡部署、回归测试、结果校验与故障兜底。两者共用尽可能一致的场景描述与时间线协议，才能降低双栈维护成本。
+        </p>
+
+        <h2>八、常见适用场景</h2>
+        <ul>
+          <li>CI 里做渲染单测、像素回归对比。</li>
+          <li>无 GPU 的 Linux 服务器做离线预览图或封面图。</li>
+          <li>图形驱动不稳定时作为降级路径。</li>
+          <li>教学与算法验证（便于观察每一步中间结果）。</li>
+        </ul>
+
+        <h2>九、结语</h2>
+        <p>
+          如果你的目标是“在 Linux 上稳定出图、可复现、可批处理”，软光栅是一条很实用的工程路线。它的价值不在极限 FPS，而在可控性与部署确定性。先把最小闭环跑通，再按业务需求逐步加功能与优化，通常是最稳妥的推进方式。
+        </p>
+
+        <div class="doc-actions">
+          <a class="btn btn--primary" href="https://github.com/cgeffect/SwRender" target="_blank" rel="noopener noreferrer">打开 GitHub 仓库</a>
+        </div>
+      </div>
+    </article>
+    <footer class="site-footer">
+      <p>王腾飞 · <span id="year"></span></p>
+    </footer>
+    <script src="../js/app.js" defer></script>
+  </body>
+</html>
