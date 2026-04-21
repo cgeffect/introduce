@@ -1,6 +1,11 @@
 {
   "technicalProjects": [
     {
+      "id": "pro0",
+      "name": "旅游Agent项目",
+      "github": "https://github.com/cgeffect/travel-agent"
+    },
+    {
       "id": "pro1",
       "name": "e2e-rendering",
       "github": "https://github.com/cgeffect/e2e-rendering"
