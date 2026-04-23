@@ -40,51 +40,8 @@
         <h2>二、成片案例（video-demo）</h2>
         <p>以下为目录内示例视频，均为本地静态文件，可直接在浏览器中预览。</p>
       </div>
-      <div class="resource-video-grid">
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/1688.mp4"></video>
-          <figcaption>1688.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/kimi.mp4"></video>
-          <figcaption>kimi.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/唯品会-乔丹.mp4"></video>
-          <figcaption>唯品会-乔丹.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/唯品会-李宁.mp4"></video>
-          <figcaption>唯品会-李宁.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/小米.mp4"></video>
-          <figcaption>小米.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/米家.mp4"></video>
-          <figcaption>米家.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/美团-歪马送酒.mp4"></video>
-          <figcaption>美团-歪马送酒.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/美团.mp4"></video>
-          <figcaption>美团.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/衣服.mp4"></video>
-          <figcaption>衣服.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/闲鱼.mp4"></video>
-          <figcaption>闲鱼.mp4</figcaption>
-        </figure>
-        <figure>
-          <video controls preload="metadata" playsinline src="../resource/pro2/video-demo/阿里巴巴国际站-icbu.mp4"></video>
-          <figcaption>阿里巴巴国际站-icbu.mp4</figcaption>
-        </figure>
+      <div class="resource-video-grid" id="pro2-video-grid">
+        <p class="cards__loading">视频列表加载中…</p>
       </div>
 
       <div class="prose stack">
@@ -113,5 +70,59 @@
       <p>王腾飞 · <span id="year"></span></p>
     </footer>
     <script src="../js/app.js" defer></script>
+    <script>
+      (function () {
+        var grid = document.getElementById("pro2-video-grid");
+        if (!grid) return;
+
+        var base = "../resource/pro2/";
+        fetch(base + "video.json")
+          .then(function (res) {
+            if (!res.ok) throw new Error("bad status");
+            return res.json();
+          })
+          .then(function (map) {
+            var entries = Object.entries(map || {});
+            grid.textContent = "";
+
+            if (!entries.length) {
+              var empty = document.createElement("p");
+              empty.className = "cards__error";
+              empty.textContent = "video.json 为空，暂无可展示视频。";
+              grid.appendChild(empty);
+              return;
+            }
+
+            entries.forEach(function (pair) {
+              var label = pair[0];
+              var file = pair[1];
+              if (!file) return;
+
+              var src = /^https?:\/\//.test(file) ? file : base + file;
+
+              var figure = document.createElement("figure");
+              var video = document.createElement("video");
+              video.controls = true;
+              video.preload = "metadata";
+              video.playsInline = true;
+              video.src = src;
+
+              var cap = document.createElement("figcaption");
+              cap.textContent = label;
+
+              figure.appendChild(video);
+              figure.appendChild(cap);
+              grid.appendChild(figure);
+            });
+          })
+          .catch(function () {
+            grid.textContent = "";
+            var err = document.createElement("p");
+            err.className = "cards__error";
+            err.textContent = "视频列表加载失败，请检查 video.json 与视频文件路径。";
+            grid.appendChild(err);
+          });
+      })();
+    </script>
   </body>
 </html>

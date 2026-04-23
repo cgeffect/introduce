@@ -304,6 +304,24 @@ main {
   }
 }
 
+.cards__loading,
+.cards__error,
+.cards__noscript {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 0.95rem;
+}
+
+.cards__error {
+  color: #b91c1c;
+}
+
+.cards__noscript code {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.9em;
+}
+
 .card {
   position: relative;
   background: var(--bg-elevated);

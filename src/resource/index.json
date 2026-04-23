@@ -1,50 +1,125 @@
 {
+  "homepageProjectIds": [
+    "pro0",
+    "pro1",
+    "pro2",
+    "pro3",
+    "pro4",
+    "pro9",
+    "pro5",
+    "pro10",
+    "pro11",
+    "pro7"
+  ],
   "technicalProjects": [
     {
-      "id": "pro0",
-      "name": "旅游Agent项目",
-      "github": "https://github.com/cgeffect/travel-agent"
+      "id": "pro2",
+      "name": "SaaS智能视频批量生产平台",
+      "resource": "pro2/云剪辑系统技术介绍.pdf",
+      "cardEyebrow": "pro2 · PDF + 成片",
+      "cardTitle": "SaaS智能视频批量生产平台",
+      "cardSummary": "Linux 上多轨道非编与合成、控制台与 OpenAPI 一体的云剪辑「制作中心」；收录系统架构与渲染链路的 PDF 说明，以及电商、本地生活等多行业营销成片 demo。",
+      "cardArt": "assets/cards/pro2.svg"
     },
     {
       "id": "pro1",
       "name": "e2e-rendering",
-      "github": "https://github.com/cgeffect/e2e-rendering"
+      "github": "https://github.com/cgeffect/e2e-rendering",
+      "cardEyebrow": "pro1 · 端云剪辑",
+      "cardTitle": "非编剪辑与多端协同预览方案+Agent",
+      "cardSummary": "桌面非编与浏览器监看、Web 侧预览与导出、与云端渲染任务同一条语义链路的实践整理；新增旅游 Agent 方向探索：通过对话式指令驱动旅行素材编排与镜头组织",
+      "cardArt": "assets/cards/pro1.svg"
     },
     {
-      "id": "pro2",
-      "name": "Linux渲染系统",
-      "resource": "pro2/云剪辑系统技术介绍.pdf"
+      "id": "pro0",
+      "name": "旅游Agent项目",
+      "github": "https://github.com/cgeffect/travel-agent",
+      "cardEyebrow": "pro0 · Travel Agent",
+      "cardTitle": "旅游智能规划助手",
+      "cardSummary": "面向旅游场景的智能助手项目，支持从用户需求出发生成可执行的行程建议，并提供持续对话式调整体验。项目详情页包含完整介绍与演示视频。",
+      "cardArt": "assets/cards/pro1.svg"
     },
     {
       "id": "pro3",
       "name": "remotion",
       "github": "https://github.com/cgeffect/remotion-render",
-      "video": "pro3/remotion.mp4"
+      "video": "pro3/remotion.mp4",
+      "cardEyebrow": "pro3 · Remotion",
+      "cardTitle": "Remotion 渲染",
+      "cardSummary": "用 React / Remotion 把组件写成时间线：适合模板化营销片、数据驱动片头与 CI 里批量出片；与 Node 渲染进程、合成参数化一套仓库管线对齐。",
+      "cardArt": "assets/cards/pro3.svg"
     },
     {
       "id": "pro4",
       "name": "AutoClip",
-      "github": "https://github.com/cgeffect/AutoClip"
+      "github": "https://github.com/cgeffect/AutoClip",
+      "cardEyebrow": "pro4 · AutoClip",
+      "cardTitle": "AutoClip（TODO）",
+      "cardSummary": "把故事线或口播脚本自动展开为可渲染时间线：串联文案分镜、素材候选、字幕与装饰轨，输出给云剪辑或端侧执行；介绍页含 Ai_Clip 按模块落地的完整技术方案（素材转码 → LLM → 召回与重排 → TTS → Timeline → 渲染）。当前状态：TODO（持续完善中）。",
+      "cardArt": "assets/cards/pro4.svg"
     },
     {
       "id": "pro5",
       "name": "skia-macos 智能海报生成",
-      "github": "https://github.com/cgeffect/skia-macos"
+      "github": "https://github.com/cgeffect/skia-macos",
+      "cardEyebrow": "pro5 · Skia / macOS",
+      "cardTitle": "营销物料批量出图",
+      "cardSummary": "基于 Skia 的模板化出图：适用商品静态图、海报、落地页与投放配图等凡需栅格图交付的场景；协议驱动版式与渲染，多格式导出，便于与中台数据批量对接。",
+      "cardArt": "assets/cards/pro5.svg"
     },
     {
       "id": "pro6",
       "name": "webrtc的通话系统",
-      "github": "https://github.com/cgeffect/webrtc_p2p"
+      "github": "https://github.com/cgeffect/webrtc_p2p",
+      "cardEyebrow": "pro6 · 实时通信",
+      "cardTitle": "webrtc 的通话系统",
+      "cardSummary": "信令与媒体通道解耦，优先 P2P，必要时走 TURN；覆盖呼叫建立、SDP/ICE、弱网与音质画质策略等工程实践，详见介绍页。",
+      "cardArt": "assets/cards/pro1.svg"
     },
     {
       "id": "pro7",
       "name": "专业视频编辑应用",
-      "github": "https://github.com/cgeffect/YouCut/tree/1.1.1"
+      "github": "https://github.com/cgeffect/YouCut/tree/1.1.1",
+      "cardEyebrow": "pro7 · iOS 剪辑",
+      "cardTitle": "移动端专业视频剪辑",
+      "cardSummary": "iOS 端专业剪辑与包装：画幅与背景、AI 人像分割与换背景、滤镜与粒子特效、美颜美体、入场出场动画与裁剪旋转，面向竖屏营销与口播成片在手机上闭环完成。",
+      "cardArt": "assets/cards/pro3.svg"
     },
     {
       "id": "pro9",
       "name": "Web Render",
-      "github": "https://github.com/cgeffect/web-render"
+      "github": "https://github.com/cgeffect/web-render",
+      "cardEyebrow": "pro9 · Web Render",
+      "cardTitle": "WebGL + WebCodecs 多轨渲染",
+      "cardSummary": "协议驱动多轨视频渲染：WebGL 合成、WebCodecs 解码编码、轨道可视化与 Inspector 参数编辑，支持离线导出 MP4（当前无声），用于在 Web 侧复刻端侧多轨渲染流程。",
+      "cardArt": "assets/cards/pro4.svg",
+      "cardHref": "https://github.com/cgeffect/web-render",
+      "cardExternal": true,
+      "cardAriaLabel": "pro9 Web Render — 打开 GitHub 项目"
+    },
+    {
+      "id": "pro10",
+      "name": "Metal实现的后处理链式调用",
+      "github": "https://github.com/cgeffect/CGMetal",
+      "cardEyebrow": "pro10 · Metal 后处理",
+      "cardTitle": "Metal 实现的后处理链式调用",
+      "cardSummary": "基于 Metal 的后处理链路实践：将多个图像/视频效果按可组合节点串联执行，支持参数化调节与多效果顺序编排，面向移动端与桌面端渲染流程复用。",
+      "cardArt": "assets/cards/pro5.svg",
+      "cardHref": "https://github.com/cgeffect/CGMetal",
+      "cardExternal": true,
+      "cardAriaLabel": "pro10 Metal 实现的后处理链式调用 — 打开 GitHub 项目"
+    },
+    {
+      "id": "pro11",
+      "name": "OpenGL实现的后处理链式调用",
+      "github": "https://github.com/cgeffect/CGPixel",
+      "cardEyebrow": "pro11 · OpenGL 后处理",
+      "cardTitle": "OpenGL 实现的后处理链式调用",
+      "cardSummary": "基于 OpenGL 的后处理链路实现：通过链式调用组织滤镜与图像增强流程，便于跨平台图形管线迁移、效果复用与渲染调参验证。",
+      "cardArt": "assets/cards/pro3.svg",
+      "cardHref": "https://github.com/cgeffect/CGPixel",
+      "cardExternal": true,
+      "cardAriaLabel": "pro11 OpenGL 实现的后处理链式调用 — 打开 GitHub 项目"
     }
   ],
   "industryInsights": [
