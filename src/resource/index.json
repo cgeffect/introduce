@@ -50,15 +50,6 @@
       "cardArt": "assets/cards/pro3.svg"
     },
     {
-      "id": "pro4",
-      "name": "AutoClip",
-      "github": "https://github.com/cgeffect/AutoClip",
-      "cardEyebrow": "pro4 · AutoClip",
-      "cardTitle": "AutoClip（TODO）",
-      "cardSummary": "把故事线或口播脚本自动展开为可渲染时间线：串联文案分镜、素材候选、字幕与装饰轨，输出给云剪辑或端侧执行；介绍页含 Ai_Clip 按模块落地的完整技术方案（素材转码 → LLM → 召回与重排 → TTS → Timeline → 渲染）。当前状态：TODO（持续完善中）。",
-      "cardArt": "assets/cards/pro4.svg"
-    },
-    {
       "id": "pro5",
       "name": "skia-macos 智能海报生成",
       "github": "https://github.com/cgeffect/skia-macos",
@@ -98,6 +89,18 @@
       "cardAriaLabel": "pro9 Web Render — 打开 GitHub 项目"
     },
     {
+      "id": "pro13",
+      "name": "web+wasm+opengl",
+      "github": "https://github.com/cgeffect/PixelForge",
+      "cardEyebrow": "pro13 · web+wasm+opengl",
+      "cardTitle": "web+wasm+opengl",
+      "cardSummary": "PixelForge 是一个跨端渲染工程模板(是web端图文编辑器的一种实践方案)\n目的是实现C++的OpenGL代码如何通过Webassembly在web端运行, 以及如何连接使用第三方静态库(a), 链接到wasm的进程里",
+      "cardArt": "assets/cards/pro4.svg",
+      "cardHref": "https://github.com/cgeffect/PixelForge",
+      "cardExternal": true,
+      "cardAriaLabel": "pro12 PixelForge — 打开 GitHub 项目"
+    },
+    {
       "id": "pro10",
       "name": "Metal实现的后处理链式调用",
       "github": "https://github.com/cgeffect/CGMetal",
@@ -120,6 +123,15 @@
       "cardHref": "https://github.com/cgeffect/CGPixel",
       "cardExternal": true,
       "cardAriaLabel": "pro11 OpenGL 实现的后处理链式调用 — 打开 GitHub 项目"
+    },
+    {
+      "id": "pro4",
+      "name": "AutoClip",
+      "github": "https://github.com/cgeffect/AutoClip",
+      "cardEyebrow": "pro4 · AutoClip",
+      "cardTitle": "AutoClip（TODO）",
+      "cardSummary": "把故事线或口播脚本自动展开为可渲染时间线：串联文案分镜、素材候选、字幕与装饰轨，输出给云剪辑或端侧执行；介绍页含 Ai_Clip 按模块落地的完整技术方案（素材转码 → LLM → 召回与重排 → TTS → Timeline → 渲染）。当前状态：TODO（持续完善中）。",
+      "cardArt": "assets/cards/pro4.svg"
     }
   ],
   "industryInsights": [
