@@ -26,8 +26,8 @@
       "name": "e2e-rendering",
       "github": "https://github.com/cgeffect/e2e-rendering",
       "cardEyebrow": "pro1 · 端云剪辑",
-      "cardTitle": "非编剪辑与多端协同预览方案+Agent",
-      "cardSummary": "桌面非编与浏览器监看、Web 侧预览与导出、与云端渲染任务同一条语义链路的实践整理；新增旅游 Agent 方向探索：通过对话式指令驱动旅行素材编排与镜头组织",
+      "cardTitle": "多轨道音视频播放器与编辑系统+Agent编辑助手",
+      "cardSummary": "支持多条视频轨道和多条音频轨道播放, 视频多轨道使用FFmpeg多路解码进行图层混合, 音频多轨道使用FFmpeg多路解码进行混音, 支持点播实时预览",
       "cardArt": "assets/cards/pro1.svg"
     },
     {
