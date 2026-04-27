@@ -4,6 +4,7 @@
     "pro1",
     "pro2",
     "pro3",
+    "pro4",
     "pro9",
     "pro5",
     "pro10",
@@ -113,6 +114,15 @@
       "cardHref": "https://github.com/cgeffect/CGPixel",
       "cardExternal": true,
       "cardAriaLabel": "pro11 OpenGL 实现的后处理链式调用 — 打开 GitHub 项目"
+    },
+    {
+      "id": "pro4",
+      "name": "AutoClip",
+      "github": "https://github.com/cgeffect/AutoClip",
+      "cardEyebrow": "pro4 · AutoClip",
+      "cardTitle": "AutoClip（TODO）",
+      "cardSummary": "把故事线或口播脚本自动展开为可渲染时间线：串联文案分镜、素材候选、字幕与装饰轨，输出给云剪辑或端侧执行；介绍页含 Ai_Clip 按模块落地的完整技术方案（素材转码 → LLM → 召回与重排 → TTS → Timeline → 渲染）。当前状态：TODO（持续完善中）。",
+      "cardArt": "assets/cards/pro4.svg"
     }
   ],
   "industryInsights": [

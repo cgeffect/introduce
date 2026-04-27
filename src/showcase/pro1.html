@@ -111,16 +111,6 @@
         <p>
           智能化能力通常以<strong>异步服务或本地插件</strong>形式接入：当前实验链路由 <strong>LangChain 经 HTTP 调用本机 Ollama</strong> 拉取生成结果，再解析为结构化建议（分镜、文案、参数包等）写回时间线或包装轨道，避免在实时预览线程内阻塞用户操作。
         </p>
-        <div class="doc-actions">
-          <a
-            class="btn btn--primary"
-            href="https://github.com/cgeffect/e2e-rendering"
-            target="_blank"
-            rel="noopener noreferrer"
-            >打开 GitHub 仓库</a
-          >
-        </div>
-
         <h2 id="webrtc-native-web">六、专题：WebRTC 下 Native 与 Web 的交互（只推只收 + 信令）</h2>
         <p>
           监看链路可以刻意做成<strong>单向媒体</strong>：<strong>Native（桌面 / LiveServer 一类进程）只负责发送音视频轨</strong>；<strong>浏览器端只接收并渲染</strong>，不向对端回推摄像头 / 麦克风画面。这样外端权限简单、带宽与隐私边界清晰，也避免在监看页误开上行导致回声或多余编码。

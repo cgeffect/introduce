@@ -57,20 +57,6 @@
           <li><strong>交通 / 住宿 Agent：</strong>分别或合并为「资源」子 Agent，负责票、酒、接驳等结构化建议（同样可走 Tool，结果回写任务节点）。</li>
           <li><strong>汇总 Agent：</strong>收集各子任务输出，去重冲突、统一口径，生成最终 <strong>Markdown</strong> 行程稿（分日 + 注意事项）。</li>
         </ul>
-        <p>
-          <strong>一次请求的调用顺序（简版）：</strong>
-        </p>
-        <ol>
-          <li>前端/CLI 将用户消息 POST 到对话接口；服务端写入 SQLite 会话表。</li>
-          <li><strong>槽位 Agent</strong>（LangChain 链）先跑：若缺关键槽位 → 直接流式返回追问，不进入规划。</li>
-          <li>槽位足够时，<strong>规划 Agent</strong> 生成 DAG 子任务并持久化；调度器按依赖将可并行节点丢给对应<strong>子 Agent</strong>（各子 Agent 为带独立 system prompt + Tools 的 LangChain Agent / Runnable）。</li>
-          <li>子任务完成后写回任务状态；全部就绪后由<strong>汇总 Agent</strong>合并为 Markdown。</li>
-          <li>需要写入长期偏好时，将摘要 embedding 写入 <strong>Chroma</strong>；下一轮对话前按 user id 做向量检索，拼进 LangChain 消息上下文。</li>
-          <li>汇总结果经 <strong>SSE</strong> 分块推给前端渲染；CLI 则一次性打印或写文件。</li>
-        </ol>
-        <p class="meta">
-          仓库：<code style="font-family: var(--mono)">https://github.com/cgeffect/travel-agent</code>
-        </p>
       </div>
     </article>
     <footer class="site-footer">

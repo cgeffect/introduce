@@ -1,339 +1,327 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="王腾飞 — 专注云剪辑、端云一致预览与 LLM 自动成片的端到端音视频与渲染方向，自荐与项目展示。"
-    />
-    <title>王腾飞 · 个人介绍</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="site-header__inner">
-        <a class="logo" href="index.html">王腾飞</a>
-        <nav class="nav" aria-label="页面导航">
-          <a href="#projects">项目模块</a>
-          <a href="#tech">技术栈</a>
-          <a href="#experience">经历</a>
-          <a href="articles/index.html">文章</a>
-          <a
-            href="https://github.com/cgeffect"
-            target="_blank"
-            rel="noopener noreferrer"
-            >GitHub</a
-          >
-        </nav>
-      </div>
-    </header>
 
-    <main>
-      <section class="hero" id="top">
-        <p class="hero__eyebrow">云剪辑 · 端云一致 · LLM 成片</p>
-        <h1>你好，我是王腾飞</h1>
-        <p class="hero__role">
-          音视频 / 渲染引擎方向 · 把「要出片」做到「可规模化上线」
-        </p>
-        <p class="hero__summary">
-          我主攻<strong>端到端视频生产</strong>，能把业务侧的脚本与素材，一路收敛成<strong>可渲染时间线</strong>，再经<strong>云剪辑</strong>落成可投放成片。<br />
-          <br />
-          四块能力我最常扛：<br />
-          <strong>Linux 云剪辑与分布式渲染</strong>——多轨合成、转码、任务调度与 GPU 流水线，支撑大批量稳定出片；<br />
-          <strong>端云一致的实时预览</strong>——同一套 C++ 渲染核心落在 macOS / Web（WASM）并与云端对齐，减少「剪完才发现不对」的返工；<br />
-          <strong>iOS / macOS 音视频编辑与渲染</strong>——端侧时间线编辑、特效与字幕包装、预览与导出链路打通，让移动端与桌面端在编辑语义和成片质量上尽量一致；<br />
-          <strong>LLM 与自动化编排</strong>——文案与分镜、素材与装饰匹配、Timeline 组装与 TTS 对齐，把智能化接到工程闭环里。<br />
-          <br />
-          若你正在找能打通「创意 → 时间线 → 云端成片」的人，往下翻项目与技术栈，底部是工作经历，我们可以很快对齐是否合拍。
-        </p>
-        <div class="hero__actions">
-          <a class="btn btn--primary" href="#projects">查看项目模块</a>
-          <a class="btn" href="articles/index.html">阅读技术文章</a>
-          <a
-            class="btn"
-            href="https://github.com/cgeffect"
-            target="_blank"
-            rel="noopener noreferrer"
-            >GitHub：cgeffect</a
-          >
-        </div>
-      </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="王腾飞 — 专注云剪辑、端云一致预览与 LLM 自动成片的端到端音视频与渲染方向，自荐与项目展示。" />
+  <title>王腾飞 · 个人介绍</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
 
-      <section class="section" id="projects">
-        <div class="section__head">
-          <h2>商业产品原型验证与技术探索</h2>
-          <p>商业产品原型验证与技术探索项目，包含旅游智能规划助手、SaaS智能视频批量生产平台、营销物料批量出图等。</p>
-          <p class="meta" style="margin-top: 6px">注：该模块在 Safari（尤其 iPhone Safari）可能出现兼容性问题，预览请优先使用 Chrome。</p>
-        </div>
-        <div class="cards cards--projects" data-project-cards aria-live="polite">
-          <p class="cards__loading" data-project-cards-loading>项目列表加载中…</p>
-        </div>
-        <noscript>
-          <p class="cards__noscript">请启用 JavaScript；项目卡片由 <code>resource/index.json</code> 提供数据。</p>
-        </noscript>
-      </section>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="logo" href="index.html">王腾飞</a>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#projects">项目模块</a>
+        <a href="#tech">技术栈</a>
+        <a href="#experience">经历</a>
+        <a href="articles/index.html">文章</a>
+        <a href="https://github.com/cgeffect" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </nav>
+    </div>
+  </header>
 
-      <section class="section" id="tech">
-        <div class="section__head">
-          <h2>技术栈</h2>
-        </div>
-        <div class="tech-grid tech-grid--wide">
-          <div class="tech-block">
-            <h3>语言与脚本</h3>
-            <p>
-              <strong>Swift、Objective-C</strong>（iOS/macOS 主力）；<strong>C++</strong>（渲染与 FFmpeg 侧核心、WASM
-              编译）；<strong>Python</strong>（预处理、算法脚本、自动化）；<strong>JavaScript / TypeScript</strong>（Electron、Remotion、工具链）；Shell、CMake
-              等工程配套。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>客户端与 UI</h3>
-            <p>
-              UIKit、SnapKit；<strong>Metal</strong> 多轨合图与性能调优；<strong>Electron</strong> 多进程架构；与设计协作（如 Figma → 代码）下的界面落地经验。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>音视频与媒体管线</h3>
-            <p>
-              FFmpeg（解码、转码、多轨合成、封装）；x264/x265；软硬编解码与 <strong>NVDEC / NVENC</strong>；时间线协议、流式加载（如 AVIO
-              分块缓存）；采集、剪辑、导出全链路。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>渲染与图形</h3>
-            <p>
-              OpenGL、<strong>SwiftShader</strong> CPU 渲染路径；<strong>CUDA–OpenGL</strong> 互操作与显存侧优化；Metal；Web 侧
-              WASM + OpenGL ES；MetalPetal、Skia 等图像/视频特效与图文场景。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>平台与运行时</h3>
-            <p>iOS、macOS、Linux 服务器；跨平台同构渲染核心的维护与裁剪；云端 GPU 作业与本地预览一致性保障。</p>
-          </div>
-          <div class="tech-block">
-            <h3>网络、消息与实时</h3>
-            <p>
-              <strong>WebRTC</strong>（自定义采集、推流监看）；<strong>ZeroMQ</strong>（Electron IPC）；<strong>MQTT</strong>（如
-              CocoaMQTT 直播消息）；<strong>RocketMQ</strong> 任务调度与 Pipeline 编排。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>AI 与智能化链路</h3>
-            <p>
-              LLM Prompt、分镜与语义标签；<strong>Pydub、MoviePy、OpenCV、librosa</strong> 等预处理；ASR / TTS 对齐；规则引擎与素材排序；<strong>LangChain</strong>、向量检索
-              <strong>Faiss / Chroma</strong>、Function Call 等按需接入。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>工程与质量</h3>
-            <p>
-              自动化<strong>视频质量回归</strong>、核心逻辑高覆盖率测试；Git 协作；复杂需求下的 POC、协议设计与文档沉淀；ToB 交付节奏与多业务线优先级管理。
-            </p>
-          </div>
-          <div class="tech-block">
-            <h3>流媒体学习实践</h3>
-            <p>RTMP/RTP、H.264/AAC 封包与解包；ZLMediaKit 搭建与基础链路验证。</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="experience">
-        <div class="section__head">
-          <h2>工作经历</h2>
-          <p>按时间倒序，以下为结构化摘要。</p>
-        </div>
-        <div class="timeline">
-          <article class="timeline__item">
-            <p class="timeline__meta">2025.10 — 2026.3 · 上海帷秀科技有限公司</p>
-            <h3>音视频工程师</h3>
-            <p>
-              Poppo Live 出海直播：短视频生产、拍摄剪辑、一键成片；模板视频（服务端渲染 +
-              端侧接入）、MQTT 消息、Metal 多轨合图等。
-            </p>
-            <ul>
-              <li>模板视频生产能力落地，降低端侧复杂度</li>
-              <li>拍摄 / 剪辑 / 导出链路，完善内容生产闭环</li>
-              <li>Metal 多轨道合图与多播放器性能优化</li>
-            </ul>
-          </article>
-
-          <article class="timeline__item">
-            <p class="timeline__meta">2022.1 — 2025.8 · 杭州奥创光年</p>
-            <h3>渲染引擎开发工程师</h3>
-            <p>
-              智能视频剪辑 SaaS：从 0 到 1 分布式音视频云服务、云剪辑渲染、端侧 Timeline
-              预览与 WASM、AI 自动成片等子系统。
-            </p>
-            <ul>
-              <li>云渲染：FFmpeg、SwiftShader、RocketMQ、GPU 硬编解码与 CUDA–OpenGL 互操作</li>
-              <li>端预览：C++/OpenGL/FFmpeg → WASM；macOS Timeline；Electron + ZeroMQ IPC</li>
-              <li>质量保障：自动化视频回归，核心逻辑高覆盖率</li>
-            </ul>
-          </article>
-
-          <article class="timeline__item">
-            <p class="timeline__meta">2020.6 — 2021.8 · 杭州格像科技</p>
-            <h3>音视频开发</h3>
-            <p>移动短视频 SDK：采集、编辑、播放、OpenGL/Metal 渲染与导出优化。</p>
-          </article>
-
-          <article class="timeline__item">
-            <p class="timeline__meta">2015 — 2020 · iOS 开发</p>
-            <h3>连信、创乔、多麦</h3>
-            <p>比优心理、轻松妈妈、海蜜全球购等产品线的 iOS 业务开发与维护。</p>
-          </article>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <p>王腾飞 · 个人介绍页 · <span id="year"></span> · 静态部署友好</p>
-      <p>
-        GitHub：
-        <a href="https://github.com/cgeffect" target="_blank" rel="noopener noreferrer"
-          >https://github.com/cgeffect</a
-        >
+  <main>
+    <section class="hero" id="top">
+      <p class="hero__eyebrow">云剪辑 · 端云一致 · LLM 成片</p>
+      <h1>你好，我是王腾飞</h1>
+      <p class="hero__role">
+        音视频 / 渲染引擎方向 · 把「要出片」做到「可规模化上线」
       </p>
-      <p>合作与交流可通过 GitHub 联系；本站不公开展示电话，避免爬虫采集。</p>
-    </footer>
+      <p class="hero__summary">
+        我主攻<strong>端到端视频生产</strong>，能把业务侧的脚本与素材，一路收敛成<strong>可渲染时间线</strong>，再经<strong>云剪辑</strong>落成可投放成片。<br />
+        <br />
+        四块能力我最常扛：<br />
+        <strong>Linux 云剪辑与分布式渲染</strong>——多轨合成、转码、任务调度与 GPU 流水线，支撑大批量稳定出片；<br />
+        <strong>端云一致的实时预览</strong>——同一套 C++ 渲染核心落在 macOS / Web（WASM）并与云端对齐，减少「剪完才发现不对」的返工；<br />
+        <strong>iOS / macOS 音视频编辑与渲染</strong>——端侧时间线编辑、特效与字幕包装、预览与导出链路打通，让移动端与桌面端在编辑语义和成片质量上尽量一致；<br />
+        <strong>LLM 与自动化编排</strong>——文案与分镜、素材与装饰匹配、Timeline 组装与 TTS 对齐，把智能化接到工程闭环里。<br />
+        <br />
+        若你正在找能打通「创意 → 时间线 → 云端成片」的人，往下翻项目与技术栈，底部是工作经历，我们可以很快对齐是否合拍。
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#projects">查看项目模块</a>
+        <a class="btn" href="articles/index.html">阅读技术文章</a>
+        <a class="btn" href="https://github.com/cgeffect" target="_blank" rel="noopener noreferrer">GitHub：cgeffect</a>
+      </div>
+    </section>
 
-    <script src="js/app.js"></script>
-    <script>
-      (function () {
-        var root = document.querySelector("[data-project-cards]");
-        if (!root) return;
+    <section class="section" id="projects">
+      <div class="section__head">
+        <h2>商业产品原型验证与技术探索</h2>
+        <p>商业产品原型验证与技术探索项目，包含旅游智能规划助手、SaaS智能视频批量生产平台、营销物料批量出图等。</p>
+        <p class="meta" style="margin-top: 6px">注：该模块在 Safari（尤其 iPhone Safari）可能出现兼容性问题，预览请优先使用 Chrome。</p>
+      </div>
+      <div class="cards cards--projects" data-project-cards aria-live="polite">
+        <p class="cards__loading" data-project-cards-loading>项目列表加载中…</p>
+      </div>
+      <noscript>
+        <p class="cards__noscript">请启用 JavaScript；项目卡片由 <code>resource/index.json</code> 提供数据。</p>
+      </noscript>
+    </section>
 
-        var SHOWCASE_IDS = {
-          pro0: true,
-          pro1: true,
-          pro2: true,
-          pro3: true,
-          pro4: true,
-          pro5: true,
-          pro6: true,
-          pro7: true,
-          pro8: true,
-        };
+    <section class="section" id="tech">
+      <div class="section__head">
+        <h2>技术栈</h2>
+      </div>
+      <div class="tech-grid tech-grid--wide">
+        <div class="tech-block">
+          <h3>语言与脚本</h3>
+          <p>
+            <strong>Swift、Objective-C</strong>（iOS/macOS 主力）；<strong>C++</strong>（渲染与 FFmpeg 侧核心、WASM
+            编译）；<strong>Python</strong>（预处理、算法脚本、自动化）；<strong>JavaScript /
+              TypeScript</strong>（Electron、Remotion、工具链）；Shell、CMake
+            等工程配套。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>客户端与 UI</h3>
+          <p>
+            UIKit、SnapKit；<strong>Metal</strong> 多轨合图与性能调优；<strong>Electron</strong> 多进程架构；与设计协作（如 Figma → 代码）下的界面落地经验。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>音视频与媒体管线</h3>
+          <p>
+            FFmpeg（解码、转码、多轨合成、封装）；x264/x265；软硬编解码与 <strong>NVDEC / NVENC</strong>；时间线协议、流式加载（如 AVIO
+            分块缓存）；采集、剪辑、导出全链路。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>渲染与图形</h3>
+          <p>
+            OpenGL、<strong>SwiftShader</strong> CPU 渲染路径；<strong>CUDA–OpenGL</strong> 互操作与显存侧优化；Metal；Web 侧
+            WASM + OpenGL ES；MetalPetal、Skia 等图像/视频特效与图文场景。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>平台与运行时</h3>
+          <p>iOS、macOS、Linux 服务器；跨平台同构渲染核心的维护与裁剪；云端 GPU 作业与本地预览一致性保障。</p>
+        </div>
+        <div class="tech-block">
+          <h3>网络、消息与实时</h3>
+          <p>
+            <strong>WebRTC</strong>（自定义采集、推流监看）；<strong>ZeroMQ</strong>（Electron IPC）；<strong>MQTT</strong>（如
+            CocoaMQTT 直播消息）；<strong>RocketMQ</strong> 任务调度与 Pipeline 编排。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>AI 与智能化链路</h3>
+          <p>
+            LLM Prompt、分镜与语义标签；<strong>Pydub、MoviePy、OpenCV、librosa</strong> 等预处理；ASR / TTS
+            对齐；规则引擎与素材排序；<strong>LangChain</strong>、向量检索
+            <strong>Faiss / Chroma</strong>、Function Call 等按需接入。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>工程与质量</h3>
+          <p>
+            自动化<strong>视频质量回归</strong>、核心逻辑高覆盖率测试；Git 协作；复杂需求下的 POC、协议设计与文档沉淀；ToB 交付节奏与多业务线优先级管理。
+          </p>
+        </div>
+        <div class="tech-block">
+          <h3>流媒体学习实践</h3>
+          <p>RTMP/RTP、H.264/AAC 封包与解包；ZLMediaKit 搭建与基础链路验证。</p>
+        </div>
+      </div>
+    </section>
 
-        function chooseJsonUrl() {
-          var current = window.location.href || "";
-          var candidates = [
-            new URL("resource/index.json", current).href,
-            new URL("./resource/index.json", current).href,
-            new URL("/src/resource/index.json", window.location.origin).href,
-          ];
-          var uniq = [];
-          candidates.forEach(function (u) {
-            if (uniq.indexOf(u) === -1) uniq.push(u);
-          });
-          return uniq;
-        }
+    <section class="section" id="experience">
+      <div class="section__head">
+        <h2>工作经历</h2>
+        <p>按时间倒序，以下为结构化摘要。</p>
+      </div>
+      <div class="timeline">
+        <article class="timeline__item">
+          <p class="timeline__meta">2025.10 — 2026.3 · 上海帷秀科技有限公司</p>
+          <h3>音视频工程师</h3>
+          <p>
+            Poppo Live 出海直播：短视频生产、拍摄剪辑、一键成片；模板视频（服务端渲染 +
+            端侧接入）、MQTT 消息、Metal 多轨合图等。
+          </p>
+          <ul>
+            <li>模板视频生产能力落地，降低端侧复杂度</li>
+            <li>拍摄 / 剪辑 / 导出链路，完善内容生产闭环</li>
+            <li>Metal 多轨道合图与多播放器性能优化</li>
+          </ul>
+        </article>
 
-        function resolveHref(project) {
-          if (project.cardHref) return project.cardHref;
-          if (SHOWCASE_IDS[project.id]) return "showcase/" + project.id + ".html";
-          if (project.github) return project.github;
-          return "#";
-        }
+        <article class="timeline__item">
+          <p class="timeline__meta">2022.1 — 2025.8 · 杭州奥创光年</p>
+          <h3>渲染引擎开发工程师</h3>
+          <p>
+            智能视频剪辑 SaaS：从 0 到 1 分布式音视频云服务、云剪辑渲染、端侧 Timeline
+            预览与 WASM、AI 自动成片等子系统。
+          </p>
+          <ul>
+            <li>云渲染：FFmpeg、SwiftShader、RocketMQ、GPU 硬编解码与 CUDA–OpenGL 互操作</li>
+            <li>端预览：C++/OpenGL/FFmpeg → WASM；macOS Timeline；Electron + ZeroMQ IPC</li>
+            <li>质量保障：自动化视频回归，核心逻辑高覆盖率</li>
+          </ul>
+        </article>
 
-        function toExternal(project, href) {
-          if (typeof project.cardExternal === "boolean") return project.cardExternal;
-          return /^https?:\/\//.test(href);
-        }
+        <article class="timeline__item">
+          <p class="timeline__meta">2020.6 — 2021.8 · 杭州格像科技</p>
+          <h3>音视频开发</h3>
+          <p>移动短视频 SDK：采集、编辑、播放、OpenGL/Metal 渲染与导出优化。</p>
+        </article>
 
-        function render(data) {
-          var projects = data.technicalProjects || [];
-          root.textContent = "";
+        <article class="timeline__item">
+          <p class="timeline__meta">2015 — 2020 · iOS 开发</p>
+        </article>
+      </div>
+    </section>
+  </main>
 
-          projects.forEach(function (p) {
-            var id = p.id || "";
-            var title = p.cardTitle || p.name || id;
-            var summary = p.cardSummary || "";
-            var eyebrow = p.cardEyebrow || (id + " · " + (p.name || ""));
-            var href = resolveHref(p);
-            var external = toExternal(p, href);
-            var art = p.cardArt || ("assets/cards/" + id + ".svg");
-            var aria = p.cardAriaLabel || (id + " " + title + (external ? " — 在新标签页打开" : " — 查看介绍"));
+  <footer class="site-footer">
+    <p>王腾飞 · 个人介绍页 · <span id="year"></span> · 静态部署友好</p>
+    <p>
+      GitHub：
+      <a href="https://github.com/cgeffect" target="_blank" rel="noopener noreferrer">https://github.com/cgeffect</a>
+    </p>
+    <p>合作与交流可通过 GitHub 联系；本站不公开展示电话，避免爬虫采集。</p>
+  </footer>
 
-            var article = document.createElement("article");
-            article.className = "card";
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var root = document.querySelector("[data-project-cards]");
+      if (!root) return;
 
-            var hit = document.createElement("a");
-            hit.className = "card__hit";
-            hit.href = href;
-            hit.setAttribute("aria-label", aria);
-            if (external) {
-              hit.target = "_blank";
-              hit.rel = "noopener noreferrer";
-            }
-            article.appendChild(hit);
+      var SHOWCASE_IDS = {
+        pro0: true,
+        pro1: true,
+        pro2: true,
+        pro3: true,
+        pro4: true,
+        pro5: true,
+        pro6: true,
+        pro7: true,
+        pro8: true,
+      };
 
-            var media = document.createElement("div");
-            media.className = "card__media";
-            var img = document.createElement("img");
-            img.className = "card__media-art";
-            img.src = art;
-            img.alt = "";
-            img.width = 800;
-            img.height = 450;
-            img.decoding = "async";
-            media.appendChild(img);
+      function chooseJsonUrl() {
+        var current = window.location.href || "";
+        var candidates = [
+          new URL("resource/index.json", current).href,
+          new URL("./resource/index.json", current).href,
+          new URL("/src/resource/index.json", window.location.origin).href,
+        ];
+        var uniq = [];
+        candidates.forEach(function (u) {
+          if (uniq.indexOf(u) === -1) uniq.push(u);
+        });
+        return uniq;
+      }
 
-            var overlay = document.createElement("div");
-            overlay.className = "card__media-overlay";
-            var eyebrowEl = document.createElement("p");
-            eyebrowEl.className = "card__media-eyebrow";
-            eyebrowEl.textContent = eyebrow;
-            overlay.appendChild(eyebrowEl);
-            var titleEl = document.createElement("h3");
-            titleEl.className = "card__media-title";
-            titleEl.textContent = title;
-            overlay.appendChild(titleEl);
-            media.appendChild(overlay);
-            article.appendChild(media);
+      function resolveHref(project) {
+        if (project.cardHref) return project.cardHref;
+        if (SHOWCASE_IDS[project.id]) return "showcase/" + project.id + ".html";
+        if (project.github) return project.github;
+        return "#";
+      }
 
-            var body = document.createElement("div");
-            body.className = "card__body";
-            var desc = document.createElement("p");
-            desc.textContent = summary;
-            body.appendChild(desc);
-            article.appendChild(body);
+      function toExternal(project, href) {
+        if (typeof project.cardExternal === "boolean") return project.cardExternal;
+        return /^https?:\/\//.test(href);
+      }
 
-            root.appendChild(article);
-          });
-        }
+      function render(data) {
+        var projects = data.technicalProjects || [];
+        root.textContent = "";
 
-        function showError(msg) {
-          root.textContent = "";
-          var p = document.createElement("p");
-          p.className = "cards__error";
-          p.textContent = msg;
-          root.appendChild(p);
-        }
+        projects.forEach(function (p) {
+          var id = p.id || "";
+          if (id === "pro6") return;
+          var title = p.cardTitle || p.name || id;
+          var summary = p.cardSummary || "";
+          var eyebrow = p.cardEyebrow || (id + " · " + (p.name || ""));
+          var href = resolveHref(p);
+          var external = toExternal(p, href);
+          var art = p.cardArt || ("assets/cards/" + id + ".svg");
+          var aria = p.cardAriaLabel || (id + " " + title + (external ? " — 在新标签页打开" : " — 查看介绍"));
 
-        if (window.location.protocol === "file:") {
-          showError("当前是 file:// 打开，无法读取本地 JSON。请先在 src 目录启动本地服务。");
+          var article = document.createElement("article");
+          article.className = "card";
+
+          var hit = document.createElement("a");
+          hit.className = "card__hit";
+          hit.href = href;
+          hit.setAttribute("aria-label", aria);
+          if (external) {
+            hit.target = "_blank";
+            hit.rel = "noopener noreferrer";
+          }
+          article.appendChild(hit);
+
+          var media = document.createElement("div");
+          media.className = "card__media";
+          var img = document.createElement("img");
+          img.className = "card__media-art";
+          img.src = art;
+          img.alt = "";
+          img.width = 800;
+          img.height = 450;
+          img.decoding = "async";
+          media.appendChild(img);
+
+          var overlay = document.createElement("div");
+          overlay.className = "card__media-overlay";
+          var eyebrowEl = document.createElement("p");
+          eyebrowEl.className = "card__media-eyebrow";
+          eyebrowEl.textContent = eyebrow;
+          overlay.appendChild(eyebrowEl);
+          var titleEl = document.createElement("h3");
+          titleEl.className = "card__media-title";
+          titleEl.textContent = title;
+          overlay.appendChild(titleEl);
+          media.appendChild(overlay);
+          article.appendChild(media);
+
+          var body = document.createElement("div");
+          body.className = "card__body";
+          var desc = document.createElement("p");
+          desc.textContent = summary;
+          body.appendChild(desc);
+          article.appendChild(body);
+
+          root.appendChild(article);
+        });
+      }
+
+      function showError(msg) {
+        root.textContent = "";
+        var p = document.createElement("p");
+        p.className = "cards__error";
+        p.textContent = msg;
+        root.appendChild(p);
+      }
+
+      if (window.location.protocol === "file:") {
+        showError("当前是 file:// 打开，无法读取本地 JSON。请先在 src 目录启动本地服务。");
+        return;
+      }
+
+      var urls = chooseJsonUrl();
+      (function tryFetch(i) {
+        if (i >= urls.length) {
+          showError("项目数据加载失败，请确认 resource/index.json 可访问。");
           return;
         }
+        fetch(urls[i])
+          .then(function (res) {
+            if (!res.ok) throw new Error("bad status");
+            return res.json();
+          })
+          .then(render)
+          .catch(function () {
+            tryFetch(i + 1);
+          });
+      })(0);
+    })();
+  </script>
+</body>
 
-        var urls = chooseJsonUrl();
-        (function tryFetch(i) {
-          if (i >= urls.length) {
-            showError("项目数据加载失败，请确认 resource/index.json 可访问。");
-            return;
-          }
-          fetch(urls[i])
-            .then(function (res) {
-              if (!res.ok) throw new Error("bad status");
-              return res.json();
-            })
-            .then(render)
-            .catch(function () {
-              tryFetch(i + 1);
-            });
-        })(0);
-      })();
-    </script>
-  </body>
 </html>
