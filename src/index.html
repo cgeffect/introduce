@@ -234,7 +234,7 @@
 
         projects.forEach(function (p) {
           var id = p.id || "";
-          if (id === "pro6") return;
+            if (id === "pro6" || id === "pro4") return;
           var title = p.cardTitle || p.name || id;
           var summary = p.cardSummary || "";
           var eyebrow = p.cardEyebrow || (id + " · " + (p.name || ""));
